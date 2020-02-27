@@ -16,7 +16,9 @@ Don't forget to install a [ `PSR-7` ](https://packagist.org/providers/psr/http-m
 
 * [PSR-15: HTTP Server Request Handlers](https://www.php-fig.org/psr/psr-15/): `TusServer` class implements `Psr\Http\Server\RequestHandlerInterface` 
 
-### Using
+### Uses
+
+* [PSR-3: Logger Interface](https://www.php-fig.org/psr/psr-3/): Optionally, pass a `Psr\Log\LoggerInterface` to `TusServer`.
 
 * [PSR-7: HTTP Message Interface](https://www.php-fig.org/psr/psr-7): An instance of `Psr\Http\Message\ServerRequestInterface` must be passed to `TusServer` .
 * [PSR-17: HTTP Factories](https://www.php-fig.org/psr/psr-17): `Responses are created by using a` Psr\Http\Message\ResponseFactoryInterface`
