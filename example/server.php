@@ -68,7 +68,8 @@ $dispatcher = new EventDispatcher();
  * - UploadStarted
  * - UploadComplete
  */
-$dispatcher->addListener(UploadComplete::class, function (UploadComplete $event) {});
+$dispatcher->addListener(UploadComplete::class, function (UploadComplete $event) {
+});
 
 $filenameFactory = new OriginalFilenameFactory($uploadDirectory);
 
@@ -79,7 +80,7 @@ $filenameFactory = new OriginalFilenameFactory($uploadDirectory);
 $tus = new TusServer($responseFactory, $streamFactory, $storage, $dispatcher, $filenameFactory);
 // $tus->setChunkSize(1_048_576 * 10); //Uploaded file is written to filesystem in chunks
 $tus->setAllowGetCalls(true, null);
-$tus->setUseIntermediateChunk(true,$chunkDirectory);
+$tus->setUseIntermediateChunk(true, $chunkDirectory);
 
 $response = $middleware->process($request, $tus);
 
