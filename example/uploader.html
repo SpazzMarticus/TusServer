@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Example - SpazzMarticus\TusServer</title>
+  <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
+  <link href="https://transloadit.edgly.net/releases/uppy/v1.6.0/uppy.min.css" rel="stylesheet">
+</head>
+
+<body>
+  <a href="/reset">Reset</a> - <i>Permanently</i> deletes uploads, storage and cache.
+  <div id="drag-drop-area"></div>
+
+  <script src="https://transloadit.edgly.net/releases/uppy/v1.6.0/uppy.js"></script>
+  <script>
+    var uppy = Uppy.Core({
+      debug: true,
+      autoProceed: true,
+    })
+      .use(Uppy.Dashboard, {
+        inline: true,
+        target: '#drag-drop-area',
+        showLinkToFileUploadResult: true, //Disable if you don't allow GET-calls via Server
+      })
+      .use(Uppy.Tus, {
+        endpoint: 'http://localhost:8000/server.php',
+        autoRetry: false,
+        retryDelays: [0, 1000, 2000, 4000, 8000],
+        limit: 1,
+        removeFingerprintOnSuccess: true,
+      });
+  </script>
+</body>
+
+</html>

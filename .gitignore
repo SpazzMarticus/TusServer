@@ -1,0 +1,7 @@
+build/code-coverage/
+example/chunks/
+example/php_error.log
+example/storage/
+example/uploads/
+node_modules/
+vendor/

@@ -1,0 +1,29 @@
+name: Lint and test
+
+on: [push, pull_request]
+
+jobs:
+  newman:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '10.x'
+      - uses: shivammathur/setup-php@v1
+        with:
+          php-version: '7.4'
+      - name: Installing npm dependencies (for testing only)
+        run: npm install
+      - name: Installing composer dependencies
+        run: composer install --prefer-source --no-interaction --no-progress --optimize-autoloader
+      - name: Check for PSR-12 coding style
+        run: vendor/bin/phpcs --runtime-set ignore_warnings_on_exit true --standard=PSR12 src/ example/ tests/
+      - name: Psalm
+        run: vendor/bin/psalm
+      - name: PHPUnit
+        run: vendor/bin/phpunit -c build/phpunit.xml
+      - name: Run PHP built-in webserver (in background)
+        run: php -S localhost:8000 example/server.php &
+      - name: Run newman tests
+        run: node node_modules/newman/bin/newman.js run -e tests/postman/tus.postman_environment.json tests/postman/tus.postman_collection.json --bail
