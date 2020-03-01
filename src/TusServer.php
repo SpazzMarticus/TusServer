@@ -22,12 +22,12 @@ use SpazzMarticus\Tus\Exceptions\UnexpectedValueException;
 use SpazzMarticus\Tus\Exceptions\RuntimeException;
 use SpazzMarticus\Tus\Factories\FilenameFactoryInterface;
 use SpazzMarticus\Tus\Providers\LocationProviderInterface;
+use SpazzMarticus\Tus\Services\FileService;
 use SplFileInfo;
 use Throwable;
 
 /**
  * @todo Check for extensions/MIME? (Extension like TargetFileFactory? Can this be checked with first chunk?)
- * @todo Put file manipulation in extra class, throwing exceptions when applicable?
  */
 class TusServer implements RequestHandlerInterface, LoggerAwareInterface
 {
@@ -45,6 +45,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
     /**
      * Package-Dependencies
      */
+    protected FileService $fileService;
     protected FilenameFactoryInterface $targetFileFactory;
     protected LocationProviderInterface $locationProvider;
 
@@ -80,6 +81,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
         $this->streamFactory = $streamFactory;
         $this->storage = $storage;
         $this->eventDispatcher = $eventDispatcher;
+        $this->fileService = new FileService();
         $this->targetFileFactory = $targetFileFactory;
         $this->locationProvider = $locationProvider;
     }
@@ -184,8 +186,8 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
             return $this->createResponse(404);
         }
 
-        $targetFile = $this->createFile($storage['file']);
-        $size = $this->getFileSize($targetFile);
+        $targetFile = $this->fileService->instance($storage['file']);
+        $size = $this->fileService->size($targetFile);
 
         $response = $this->createResponse(200)
             ->withHeader('Upload-Offset', (string) $size);
@@ -231,9 +233,11 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
         ];
         $this->storage->set($uuid->getHex(), $storage);
 
-        if (file_put_contents($targetFile->getPathname(), '') === false) {
+        try {
+            $this->fileService->create($targetFile);
+        } catch (RuntimeException $exception) {
             $this->storage->delete($uuid->getHex());
-            throw new RuntimeException('File ' . $targetFile->getPathname() . ' could not be created');
+            throw $exception;
         }
 
         //Created
@@ -292,15 +296,15 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
             }
         }
 
-        $targetFile = $this->createFile($storage['file']);
+        $targetFile = $this->fileService->instance($storage['file']);
 
-        if (!$this->getFileExists($targetFile)) {
+        if (!$this->fileService->exists($targetFile)) {
             return $this->createResponse(404);
         }
 
         $offset = (int) $this->getHeaderScalar($request, 'Upload-Offset') ?: 0;
 
-        $size = $this->getFileSize($targetFile);
+        $size = $this->fileService->size($targetFile);
 
         if ($size !== $offset) {
             /**
@@ -311,20 +315,11 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
 
         if ($this->useIntermediateChunk) {
             $chunkFile = new SplFileInfo(tempnam($this->chunkDirectory, $uuid->getHex()));
-            $chunkHandle = fopen($chunkFile->getPathname(), 'rb+');
-            if (!$chunkHandle) {
-                throw new RuntimeException('Can not open file ' . $chunkFile->getPathname());
-            }
+            $chunkHandle = $this->fileService->open($chunkFile);
         }
 
-        $fileHandle = fopen($targetFile->getPathname(), 'rb+');
-        if (!$fileHandle) {
-            throw new RuntimeException('Can not open file ' . $targetFile->getPathname());
-        }
-
-        if (fseek($fileHandle, $offset) !== 0) {
-            throw new RuntimeException('Can not set pointer in file');
-        }
+        $fileHandle = $this->fileService->open($targetFile);
+        $this->fileService->point($fileHandle, $offset);
 
         try {
             $bytesTransfered = $this->writeInputToFile($request, $this->useIntermediateChunk ? $chunkHandle : $fileHandle, $defer, $offset, $storage['length']);
@@ -332,52 +327,47 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
             /**
              * Delete upload on Conflict
              */
-            if ($this->getFileExists($targetFile)) {
-                $this->deleteFile($targetFile);
-            }
+            $this->fileService->delete($targetFile);
             return $this->createResponse(409); //Conflict
         }
 
         if ($this->useIntermediateChunk) {
             $exception = null;
             try {
-                if (fseek($chunkHandle, 0) !== 0) {
-                    throw new RuntimeException('Can not set pointer in file');
-                }
-
+                $this->fileService->point($chunkHandle, 0);
                 /**
                  * @todo Test for huge files, test with apache/nginx, php built in is RAM hungry
                  */
-                if (stream_copy_to_stream($chunkHandle, $fileHandle) !== $bytesTransfered) {
-                    throw new RuntimeException('Can not copy chunk ' . $chunkFile->getPathname() . ' to target file ' . $targetFile->getPathname());
+                if ($this->fileService->copy($chunkHandle, $fileHandle) !== $bytesTransfered) {
+                    throw new RuntimeException('Error when copying ' . $chunkFile->getPathname() . ' to target file ' . $targetFile->getPathname());
                 }
 
-                fflush($fileHandle);
+                $this->fileService->flush($fileHandle);
             } catch (RuntimeException $t) {
                 $exception = $t;
             } finally {
                 /**
                  * Clean up and rethrow
                  */
-                fclose($fileHandle);
-                fclose($chunkHandle);
-                $this->deleteFile($chunkFile);
+                $this->fileService->close($fileHandle);
+                $this->fileService->close($chunkHandle);
+                $this->fileService->delete($chunkFile);
                 if ($exception) {
                     throw $exception;
                 }
             }
         }
 
-        $size = $this->getFileSize($targetFile);
+        $size = $this->fileService->size($targetFile);
 
         if ($defer) {
             if ($offset + $bytesTransfered > $this->maxSize) {
-                $this->deleteFile($targetFile);
+                $this->fileService->delete($targetFile);
                 return $this->createResponse(409, $response);
             }
         } else {
             if ($offset + $bytesTransfered !== $size) {
-                $this->deleteFile($targetFile);
+                $this->fileService->delete($targetFile);
                 return $this->createResponse(409, $response);
             }
         }
@@ -422,12 +412,8 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
          * Reading input in chunks helps to support large files
          */
         try {
-            while (!feof($upload)) {
-                $chunk = fread($upload, $this->chunkSize);
-
-                if ($chunk === false) {
-                    throw new RuntimeException("Read error");
-                }
+            while (!$this->fileService->eof($upload)) {
+                $chunk = $this->fileService->read($upload, $this->chunkSize);
 
                 if ($chunk === "") {
                     /**
@@ -436,19 +422,9 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
                     break;
                 }
 
-                $bytes = fwrite($fileHandle, $chunk);
+                $bytes = $this->fileService->write($fileHandle, $chunk);
 
-                if ($bytes === false) {
-                    throw new RuntimeException("Write error");
-                }
-
-                if ($bytes !== strlen($chunk)) {
-                    throw new RuntimeException("Another write error");
-                }
-
-                if (!fflush($fileHandle)) {
-                    throw new RuntimeException("Flush error");
-                }
+                $this->fileService->flush($fileHandle);
 
                 $bytesTransfered += $bytes;
 
@@ -463,7 +439,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
                 }
             }
         } finally {
-            fclose($upload);
+            $this->fileService->close($upload);
         }
 
         return $bytesTransfered;
@@ -498,9 +474,9 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
             return $this->createResponse(403);
         }
 
-        $targetFile = $this->createFile($storage['file']);
+        $targetFile = $this->fileService->instance($storage['file']);
 
-        if (!$this->getFileExists($targetFile)) {
+        if (!$this->fileService->exists($targetFile)) {
             return $this->createResponse(404);
         }
 
@@ -511,7 +487,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
          * Filename currently not escaped
          * @see https://stackoverflow.com/a/5677844
          */
-        $response = $response->withHeader('Content-Length', (string) $this->getFileSize($targetFile))
+        $response = $response->withHeader('Content-Length', (string) $this->fileService->size($targetFile))
             ->withHeader('Content-Disposition', 'attachment; filename="' . $targetFile->getFilename() . '"')
             ->withHeader('Content-Transfer-Encoding', 'binary');
 
@@ -521,32 +497,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
 
         return $response;
     }
-    /**
-     * Checks file existance with clearing stat cache
-     */
-    protected function getFileExists(SplFileInfo $file): bool
-    {
-        $pathname = $file->getPathname();
-        /**
-         * Affected by status cache
-         * @see https://www.php.net/manual/en/function.clearstatcache.php
-         */
-        clearstatcache(false, $pathname);
-        return file_exists($pathname);
-    }
-    /**
-     * Get (true) size of file with clearing stat cache
-     */
-    protected function getFileSize(SplFileInfo $file): int
-    {
-        $pathname = $file->getPathname();
-        /**
-         * Affected by status cache
-         * @see https://www.php.net/manual/en/function.clearstatcache.php
-         */
-        clearstatcache(false, $pathname);
-        return filesize($pathname) ?: 0;
-    }
+
 
     /**
      * Create a basic Response
@@ -590,25 +541,5 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
         }
 
         return $metadata;
-    }
-
-    /**
-     * Create file object from path
-     */
-    protected function createFile(string $pathname): SplFileInfo
-    {
-        return new SplFileInfo($pathname);
-    }
-
-    /**
-     * Delete file and log, if it exists and can not be deleted
-     */
-    protected function deleteFile(SplFileInfo $file): void
-    {
-        if (!unlink($file->getPathname())) {
-            if ($this->getFileExists($file)) {
-                $this->logger->notice("Could not delete file " . $file->getPathname());
-            }
-        }
     }
 }
