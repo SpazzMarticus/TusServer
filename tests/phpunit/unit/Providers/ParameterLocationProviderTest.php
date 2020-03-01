@@ -5,7 +5,7 @@ namespace SpazzMarticus\Tus\Providers;
 use Ramsey\Uuid\Uuid;
 use Mockery;
 use Psr\Http\Message\ServerRequestInterface;
-use SpazzMarticus\Tus\Exceptions\LogicException;
+use SpazzMarticus\Tus\Exceptions\UnexpectedValueException;
 
 class ParameterLocationProviderTest extends AbstractLocationProviderTest
 {
@@ -28,8 +28,7 @@ class ParameterLocationProviderTest extends AbstractLocationProviderTest
     protected function mockServerRequestInterface(array $queryParams): ServerRequestInterface
     {
         $request = Mockery::mock(ServerRequestInterface::class);
-        $request->allows()
-            ->getQueryParams()
+        $request->shouldReceive('getQueryParams')
             ->andReturn($queryParams);
 
         return $request;
@@ -49,7 +48,7 @@ class ParameterLocationProviderTest extends AbstractLocationProviderTest
     {
         $request = $this->mockServerRequestInterface(['uuid' => 'this-will-definitly-not-work']);
 
-        $this->expectException(LogicException::class);
+        $this->expectException(UnexpectedValueException::class);
         $this->provider->provideUuid($request);
     }
 
@@ -57,7 +56,7 @@ class ParameterLocationProviderTest extends AbstractLocationProviderTest
     {
         $request = $this->mockServerRequestInterface([]);
 
-        $this->expectException(LogicException::class);
+        $this->expectException(UnexpectedValueException::class);
         $this->provider->provideUuid($request);
     }
 }

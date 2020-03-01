@@ -2,6 +2,6 @@
 
 namespace SpazzMarticus\Tus\Exceptions;
 
-class UnexpectedValueException extends \LogicException
+class UnexpectedValueException extends \UnexpectedValueException
 {
 }

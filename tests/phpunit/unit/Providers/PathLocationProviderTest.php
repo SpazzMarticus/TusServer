@@ -7,7 +7,7 @@ use Mockery;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
 use Ramsey\Uuid\UuidInterface;
-use SpazzMarticus\Tus\Exceptions\LogicException;
+use SpazzMarticus\Tus\Exceptions\UnexpectedValueException;
 
 class PathLocationProviderTest extends AbstractLocationProviderTest
 {
@@ -29,15 +29,9 @@ class PathLocationProviderTest extends AbstractLocationProviderTest
 
     protected function mockServerRequestInterface(string $path): ServerRequestInterface
     {
-        $uri = Mockery::mock(UriInterface::class);
-        $uri->allows()
-            ->getPath()
-            ->andReturn($path);
-
         $request = Mockery::mock(ServerRequestInterface::class);
-        $request->allows()
-            ->getUri()
-            ->andReturn($uri);
+        $request->shouldReceive('getUri->getPath')
+            ->andReturn($path);
 
         return $request;
     }
@@ -48,12 +42,12 @@ class PathLocationProviderTest extends AbstractLocationProviderTest
     public function testProvideUuid(ServerRequestInterface $request, ?UuidInterface $uuid)
     {
         /**
-         * Test for UUID or LogicException
+         * Test for UUID or UnexpectedValueException
          */
         if ($uuid) {
             $this->assertEquals($uuid, $this->provider->provideUuid($request));
         } else {
-            $this->expectException(LogicException::class);
+            $this->expectException(UnexpectedValueException::class);
             $this->provider->provideUuid($request);
         }
     }
