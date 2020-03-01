@@ -3,7 +3,7 @@
 namespace SpazzMarticus\Tus\Factories;
 
 use SplFileInfo;
-use SpazzMarticus\Tus\Factories\UUIDFilenameFactory;
+use SpazzMarticus\Tus\Factories\UuidFilenameFactory;
 
 class UuidFilenameFactoryTest extends AbstractFilenameFactoryTest
 {
