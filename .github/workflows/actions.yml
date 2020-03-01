@@ -21,9 +21,9 @@ jobs:
         run: vendor/bin/psalm
       - name: PHPUnit
         run: vendor/bin/phpunit -c build/phpunit.xml
-      - name: Run PHP built-in webserver (in background)
-        run: php -S localhost:8000 example/server.php &
       - name: Installing npm dependencies (for testing only)
         run: npm install
+      - name: Run PHP built-in webserver (in background)
+        run: php -S localhost:8000 example/server.php &
       - name: Run newman tests
         run: node node_modules/newman/bin/newman.js run -e tests/postman/tus.postman_environment.json tests/postman/tus.postman_collection.json --bail
