@@ -12,7 +12,7 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use RuntimeException;
 
-class Middleware implements MiddlewareInterface
+class ExampleMiddleware implements MiddlewareInterface
 {
     
     protected ResponseFactoryInterface $responseFactory;

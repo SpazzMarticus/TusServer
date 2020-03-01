@@ -1,9 +1,7 @@
 <?php
 
-use SpazzMarticus\Example\Middleware;
 use SpazzMarticus\Tus\Events\UploadComplete;
 use SpazzMarticus\Tus\TusServer;
-use Psr\Http\Message\ResponseInterface;
 use Laminas\Diactoros\ServerRequestFactory;
 use Laminas\Diactoros\ResponseFactory;
 use Laminas\Diactoros\StreamFactory;
@@ -13,7 +11,6 @@ use League\Flysystem\Adapter\Local;
 use League\Flysystem\Filesystem;
 use Cache\Adapter\Filesystem\FilesystemCachePool;
 use SpazzMarticus\Tus\Factories\OriginalFilenameFactory;
-use SpazzMarticus\Tus\Factories\UUIDFilenameFactory;
 use SpazzMarticus\Tus\Providers\ParameterLocationProvider;
 
 ini_set('display_errors', "1");
@@ -51,7 +48,7 @@ $streamFactory = new StreamFactory();
  * PSR-15 HTTP Server Request Handlers
  * - Psr\Http\Server\MiddlewareInterface
  */
-$middleware = new Middleware($responseFactory, $streamFactory, $uploadDirectory, $chunkDirectory, $cacheDirectory);
+$middleware = new \SpazzMarticus\Example\ExampleMiddleware($responseFactory, $streamFactory, $uploadDirectory, $chunkDirectory, $cacheDirectory);
 
 /**
  * PSR-16 Simple Cache (Common Interface for Caching Libraries)
