@@ -9,7 +9,7 @@ use SpazzMarticus\Tus\Exceptions\UnexpectedValueException;
 interface LocationProviderInterface
 {
     /**
-     * Provides a partial or full location string 
+     * Provides a partial or full location string
      * @return string
      */
     public function provideLocation(UuidInterface $uuid): string;

@@ -56,7 +56,7 @@ $middleware = new Middleware($responseFactory, $streamFactory, $uploadDirectory,
 /**
  * PSR-16 Simple Cache (Common Interface for Caching Libraries)
  * - Psr\SimpleCache\CacheInterface
- * 
+ *
  * Use (at least at the end of a cache chain) a non-volatile storage to truly allow resumable uploads
  */
 $storage = new FilesystemCachePool(new Filesystem(new Local($cacheDirectory)), '');

@@ -4,7 +4,8 @@ namespace SpazzMarticus\Tus\Providers;
 
 use SpazzMarticus\Tus\Exceptions\UnexpectedValueException;
 
-abstract class AbstractLocationProvider implements LocationProviderInterface{
+abstract class AbstractLocationProvider implements LocationProviderInterface
+{
 
     /**
      * @throws UnexpectedValueException
@@ -13,5 +14,4 @@ abstract class AbstractLocationProvider implements LocationProviderInterface{
     {
         throw new UnexpectedValueException('No, or invalid uuid given!');
     }
-
 }
