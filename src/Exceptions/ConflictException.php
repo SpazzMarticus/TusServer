@@ -2,6 +2,6 @@
 
 namespace SpazzMarticus\Tus\Exceptions;
 
-class ConflictException extends \RuntimeException 
+class ConflictException extends \RuntimeException
 {
 }
