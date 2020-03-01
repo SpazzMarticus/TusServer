@@ -5,15 +5,15 @@ namespace SpazzMarticus\Tus\Factories;
 use SplFileInfo;
 use SpazzMarticus\Tus\Factories\UUIDFilenameFactory;
 
-class UUIDFilenameFactoryTest extends AbstractFilenameFactoryTest
+class UuidFilenameFactoryTest extends AbstractFilenameFactoryTest
 {
 
-    protected UUIDFilenameFactory $factory;
+    protected UuidFilenameFactory $factory;
 
     public function setUp(): void
     {
         parent::setUp();
-        $this->factory = new UUIDFilenameFactory($this->directory);
+        $this->factory = new UuidFilenameFactory($this->directory);
     }
 
     public function testGenerateFilename(): void
