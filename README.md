@@ -4,7 +4,7 @@ A **server** implementation of the [_"tus.io Resumable File Uploads"_](https://t
 
 ## Installation
 
-Use [https://getcomposer.org/](composer) to install:
+Use [composer](https://getcomposer.org/) to install:
 
 ```bash
 composer require spazzmarticus/tus-server
