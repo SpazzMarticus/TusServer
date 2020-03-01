@@ -12,11 +12,11 @@ composer require spazzmarticus/tus-server
 
 Don't forget to install a [ `PSR-7` ](https://packagist.org/providers/psr/http-message-implementation) and a [ `PSR-17` ](https://packagist.org/providers/psr/http-factory-implementation) implementation you want to use.
 
-### Implements
+## Implements
 
 * [PSR-15: HTTP Server Request Handlers](https://www.php-fig.org/psr/psr-15/): `TusServer` class implements `Psr\Http\Server\RequestHandlerInterface` 
 
-### Uses
+## Uses
 
 * [PSR-3: Logger Interface](https://www.php-fig.org/psr/psr-3/): Optionally, pass a `Psr\Log\LoggerInterface` to `TusServer`.
 
