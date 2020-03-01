@@ -40,3 +40,6 @@ Open your browser, surf to [https://localhost:8000/](https://localhost:8000/) an
 
 Uploads are stored at `example/uploads/...`, the filesystem cache at `example/cache/`. There is an application log at `example/log/application.log` containing some information. Surf to [https://localhost:8000/reset](https://localhost:8000/reset) to **permanently delete** both *uploads, intermediate chunks and the metadata-storage*.
 
+## Examples
+
+- [Slim v4](https://github.com/SpazzMarticus/TusServer-Example-Slim)
