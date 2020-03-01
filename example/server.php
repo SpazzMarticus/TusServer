@@ -88,7 +88,7 @@ $locationProvider = new ParameterLocationProvider();
 $tus = new TusServer($responseFactory, $streamFactory, $storage, $dispatcher, $filenameFactory, $locationProvider);
 // $tus->setChunkSize(1_048_576 * 10); //Uploaded file is written to filesystem in chunks
 $tus->setAllowGetCalls(true, null);
-$tus->setUseIntermediateChunk(true, $chunkDirectory);
+// $tus->setUseIntermediateChunk(true, $chunkDirectory); //Using intermediate chunks is required when using checksums (which currently are not implemented)
 
 $response = $middleware->process($request, $tus);
 
