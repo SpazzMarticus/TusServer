@@ -26,8 +26,8 @@ use SplFileInfo;
 use Throwable;
 
 /**
- * @todo Add suggestions for installation of (tested?) PSR-implementations to composer.json
- * @todo Check for extensions or MIME? (Extension like TargetFileFactory?)
+ * @todo Check for extensions/MIME? (Extension like TargetFileFactory? Can this be checked with first chunk?)
+ * @todo Put file manipulation in extra class, throwing exceptions when applicable?
  */
 class TusServer implements RequestHandlerInterface, LoggerAwareInterface
 {
@@ -303,6 +303,9 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
         $size = $this->getFileSize($targetFile);
 
         if ($size !== $offset) {
+            /**
+             * Don't delete file, client can continue upload with correct offset
+             */
             return $this->createResponse(409, $response); //Conflict
         }
 
@@ -326,6 +329,12 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
         try {
             $bytesTransfered = $this->writeInputToFile($request, $this->useIntermediateChunk ? $chunkHandle : $fileHandle, $defer, $offset, $storage['length']);
         } catch (ConflictException $e) {
+            /**
+             * Delete upload on Conflict
+             */
+            if ($this->getFileExists($targetFile)) {
+                $this->deleteFile($targetFile);
+            }
             return $this->createResponse(409); //Conflict
         }
 
@@ -337,7 +346,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
                 }
 
                 /**
-                 * @todo Test for huge files
+                 * @todo Test for huge files, test with apache/nginx, php built in is RAM hungry
                  */
                 if (stream_copy_to_stream($chunkHandle, $fileHandle) !== $bytesTransfered) {
                     throw new RuntimeException('Can not copy chunk ' . $chunkFile->getPathname() . ' to target file ' . $targetFile->getPathname());
@@ -445,16 +454,10 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
 
                 if ($defer) {
                     if ($offset + $bytesTransfered > $this->maxSize) {
-                        /**
-                         * @todo Delete file?
-                         */
                         throw new ConflictException("Upload exceeds max allowed size");
                     }
                 } else {
                     if ($offset + $bytesTransfered > $uploadLength) {
-                        /**
-                         * @todo Delete file?
-                         */
                         throw new ConflictException("Upload exceeds size limit");
                     }
                 }
@@ -505,7 +508,8 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
             ->withBody($this->streamFactory->createStreamFromFile($targetFile->getPathname()));
 
         /**
-         * @todo Escape Filename?
+         * Filename currently not escaped
+         * @see https://stackoverflow.com/a/5677844
          */
         $response = $response->withHeader('Content-Length', (string) $this->getFileSize($targetFile))
             ->withHeader('Content-Disposition', 'attachment; filename="' . $targetFile->getFilename() . '"')
@@ -519,11 +523,14 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
     }
     /**
      * Checks file existance with clearing stat cache
-     * @todo Does stat cache affect file_exists?
      */
     protected function getFileExists(SplFileInfo $file): bool
     {
         $pathname = $file->getPathname();
+        /**
+         * Affected by status cache
+         * @see https://www.php.net/manual/en/function.clearstatcache.php
+         */
         clearstatcache(false, $pathname);
         return file_exists($pathname);
     }
@@ -533,6 +540,10 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
     protected function getFileSize(SplFileInfo $file): int
     {
         $pathname = $file->getPathname();
+        /**
+         * Affected by status cache
+         * @see https://www.php.net/manual/en/function.clearstatcache.php
+         */
         clearstatcache(false, $pathname);
         return filesize($pathname) ?: 0;
     }
