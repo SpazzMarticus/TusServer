@@ -237,11 +237,6 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
         }
 
         //Created
-        /**
-         * @todo LocationProviderInterface?!
-         * @todo LocationExtractorInterface?!
-         * Ein Interface mit beiden funktionen wäre besser
-         */
         $response = $this->createResponse(201)
             ->withHeader('Location', $this->locationProvider->provideLocation($uuid));
 
