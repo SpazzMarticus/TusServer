@@ -24,7 +24,7 @@ Don't forget to install a [ `PSR-7` ](https://packagist.org/providers/psr/http-m
 * [PSR-17: HTTP Factories](https://www.php-fig.org/psr/psr-17): `Responses are created by using a` Psr\Http\Message\ResponseFactoryInterface`
 
 
-* [PSR-16: Simple Cache](https://www.php-fig.org/psr/psr-16): Is used to **store** necessary metadata (path to the file,  `Upload-Metadata` passed by client, ...) per upload. Instead of using a volatile cache (like apcu) only, you probably should use a chain containing both a fast volatile and a slower non-volatile cache. (Losing the storage mid-upload does not allow resuming uploads.)
+* [PSR-16: Simple Cache](https://www.php-fig.org/psr/psr-16): Is used to **store** necessary _server_-metadata (path to the file,  `Upload-Metadata` passed by client, ...) per upload. Instead of using a volatile cache (like apcu) only, you probably should use a chain containing both a fast volatile and a slower non-volatile cache. (Losing the storage mid-upload does not allow resuming uploads.)
 
 * [PSR-12: Extended Coding Style Guide](https://www.php-fig.org/psr/psr-12): Code is written according to PSR-12
 
@@ -38,5 +38,5 @@ php -S localhost:8000 example/server.php
 
 Open your browser, surf to [https://localhost:8000/](https://localhost:8000/) and use ([Uppy](https://uppy.io/)) to upload.
 
-Uploads are stored at `example/uploads/...`, the filesystem cache at `example/cache/`. There is an application log at `example/log/application.log` containing some information. Surf to [https://localhost:8000/reset](https://localhost:8000/reset) to **permanently delete** both *uploads and cache*.
+Uploads are stored at `example/uploads/...`, the filesystem cache at `example/cache/`. There is an application log at `example/log/application.log` containing some information. Surf to [https://localhost:8000/reset](https://localhost:8000/reset) to **permanently delete** both *uploads, intermediate chunks and the metadata-storage*.
 

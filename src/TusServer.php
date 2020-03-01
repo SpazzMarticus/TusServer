@@ -18,9 +18,10 @@ use Ramsey\Uuid\UuidInterface;
 use SpazzMarticus\Tus\Events\UploadComplete;
 use SpazzMarticus\Tus\Events\UploadStarted;
 use SpazzMarticus\Tus\Exceptions\ConflictException;
-use SpazzMarticus\Tus\Exceptions\LogicException;
+use SpazzMarticus\Tus\Exceptions\UnexpectedValueException;
 use SpazzMarticus\Tus\Exceptions\RuntimeException;
-use SpazzMarticus\Tus\Factories\TargetFileFactoryInterface;
+use SpazzMarticus\Tus\Factories\FilenameFactoryInterface;
+use SpazzMarticus\Tus\Providers\LocationProviderInterface;
 use SplFileInfo;
 use Throwable;
 
@@ -44,7 +45,8 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
     /**
      * Package-Dependencies
      */
-    protected TargetFileFactoryInterface $targetFileFactory;
+    protected FilenameFactoryInterface $targetFileFactory;
+    protected LocationProviderInterface $locationProvider;
 
     /**
      * Size Settings
@@ -65,14 +67,21 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
     protected bool $useIntermediateChunk = false;
     protected string $chunkDirectory = '';
 
-    public function __construct(ResponseFactoryInterface $responseFactory, StreamFactoryInterface $streamFactory, CacheInterface $storage, EventDispatcherInterface $eventDispatcher, TargetFileFactoryInterface $targetFileFactory)
-    {
+    public function __construct(
+        ResponseFactoryInterface $responseFactory,
+        StreamFactoryInterface $streamFactory,
+        CacheInterface $storage,
+        EventDispatcherInterface $eventDispatcher,
+        FilenameFactoryInterface $targetFileFactory,
+        LocationProviderInterface $locationProvider
+    ) {
         $this->logger = new NullLogger();
         $this->responseFactory = $responseFactory;
         $this->streamFactory = $streamFactory;
         $this->storage = $storage;
         $this->eventDispatcher = $eventDispatcher;
         $this->targetFileFactory = $targetFileFactory;
+        $this->locationProvider = $locationProvider;
     }
 
     /**
@@ -164,8 +173,8 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
     protected function handleHead(ServerRequestInterface $request): ResponseInterface
     {
         try {
-            $uuid = $this->getUuid($request);
-        } catch (Throwable $t) {
+            $uuid = $this->locationProvider->provideUuid($request);
+        } catch (UnexpectedValueException $t) {
             return $this->createResponse(404);
         }
 
@@ -228,8 +237,13 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
         }
 
         //Created
+        /**
+         * @todo LocationProviderInterface?!
+         * @todo LocationExtractorInterface?!
+         * Ein Interface mit beiden funktionen wäre besser
+         */
         $response = $this->createResponse(201)
-            ->withHeader('Location', '?id=' . $uuid->getHex());
+            ->withHeader('Location', $this->locationProvider->provideLocation($uuid));
 
         if ($defer) {
             $response = $response->withHeader('Upload-Defer-Length', "1");
@@ -254,8 +268,8 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
 
         if (!$uuid) {
             try {
-                $uuid = $this->getUuid($request);
-            } catch (Throwable $t) {
+                $uuid = $this->locationProvider->provideUuid($request);
+            } catch (UnexpectedValueException $t) {
                 return $this->createResponse(404);
             }
         }
@@ -468,8 +482,8 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
         }
 
         try {
-            $uuid = $this->getUuid($request);
-        } catch (Throwable $t) {
+            $uuid = $this->locationProvider->provideUuid($request);
+        } catch (UnexpectedValueException $t) {
             return $this->createResponse(400);
         }
 
@@ -537,20 +551,6 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
         return $response
             ->withHeader('Cache-Control', 'no-store')
             ->withHeader('Tus-Resumable', '1.0.0');
-    }
-
-    /**
-     * Fetch UUID from Request and validate it
-     */
-    protected function getUuid(ServerRequestInterface $request): UuidInterface
-    {
-        $id = $request->getQueryParams()['id'];
-
-        if (!$id) {
-            throw new LogicException("No ID given");
-        }
-
-        return Uuid::fromString($id);
     }
 
     /**

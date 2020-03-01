@@ -24,7 +24,7 @@
         showLinkToFileUploadResult: true, //Disable if you don't allow GET-calls via Server
       })
       .use(Uppy.Tus, {
-        endpoint: 'http://localhost:8000/server.php',
+        endpoint: 'http://localhost:8000/upload/',
         autoRetry: false,
         retryDelays: [0, 1000, 2000, 4000, 8000],
         limit: 1,

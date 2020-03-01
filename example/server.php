@@ -14,6 +14,7 @@ use League\Flysystem\Filesystem;
 use Cache\Adapter\Filesystem\FilesystemCachePool;
 use SpazzMarticus\Tus\Factories\OriginalFilenameFactory;
 use SpazzMarticus\Tus\Factories\UUIDFilenameFactory;
+use SpazzMarticus\Tus\Providers\ParameterLocationProvider;
 
 ini_set('display_errors', "1");
 ini_set('display_startup_errors', "1");
@@ -55,6 +56,8 @@ $middleware = new Middleware($responseFactory, $streamFactory, $uploadDirectory,
 /**
  * PSR-16 Simple Cache (Common Interface for Caching Libraries)
  * - Psr\SimpleCache\CacheInterface
+ * 
+ * Use (at least at the end of a cache chain) a non-volatile storage to truly allow resumable uploads
  */
 $storage = new FilesystemCachePool(new Filesystem(new Local($cacheDirectory)), '');
 
@@ -71,13 +74,21 @@ $dispatcher = new EventDispatcher();
 $dispatcher->addListener(UploadComplete::class, function (UploadComplete $event) {
 });
 
+
+/**
+ * Dependencies from this implementation:
+ * - SpazzMarticus\Tus\Factories\FilenameFactoryInterface defines where the upload file should go
+ * - SpazzMarticus\Tus\Factories\LocationProviderInterface defines the server endpoint, which should be used
+ */
+
 $filenameFactory = new OriginalFilenameFactory($uploadDirectory);
+$locationProvider = new ParameterLocationProvider();
 
 /**
  * PSR-15 HTTP Server Request Handlers
  * - RequestHandlerInterface
  */
-$tus = new TusServer($responseFactory, $streamFactory, $storage, $dispatcher, $filenameFactory);
+$tus = new TusServer($responseFactory, $streamFactory, $storage, $dispatcher, $filenameFactory, $locationProvider);
 // $tus->setChunkSize(1_048_576 * 10); //Uploaded file is written to filesystem in chunks
 $tus->setAllowGetCalls(true, null);
 $tus->setUseIntermediateChunk(true, $chunkDirectory);
