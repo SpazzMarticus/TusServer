@@ -24,6 +24,7 @@ use SpazzMarticus\Tus\Factories\FilenameFactoryInterface;
 use SpazzMarticus\Tus\Providers\LocationProviderInterface;
 use SpazzMarticus\Tus\Services\FileService;
 use SplFileInfo;
+use SplFileObject;
 use Throwable;
 
 /**
@@ -332,25 +333,33 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
         }
 
         if ($this->useIntermediateChunk) {
+            unset($chunkHandle);
             $exception = null;
             try {
-                $this->fileService->point($chunkHandle, 0);
                 /**
                  * @todo Test for huge files, test with apache/nginx, php built in is RAM hungry
+                 * @todo If chunk size is checked, no need to check again?
+                 * @todo Is StreamFactory fast (enough)?
                  */
-                if ($this->fileService->copy($chunkHandle, $fileHandle) !== $bytesTransfered) {
+                if (
+                    $this->fileService->copyFromStream(
+                        $fileHandle,
+                        $this->streamFactory->createStreamFromFile($chunkFile->getPathname()),
+                        $this->chunkSize
+                    ) !== $bytesTransfered
+                ) {
+                    /**
+                     * @todo Check needed?
+                     */
                     throw new RuntimeException('Error when copying ' . $chunkFile->getPathname() . ' to target file ' . $targetFile->getPathname());
                 }
-
-                $this->fileService->flush($fileHandle);
             } catch (RuntimeException $t) {
                 $exception = $t;
             } finally {
                 /**
                  * Clean up and rethrow
                  */
-                $this->fileService->close($fileHandle);
-                $this->fileService->close($chunkHandle);
+                unset($fileHandle);
                 $this->fileService->delete($chunkFile);
                 if ($exception) {
                     throw $exception;
@@ -394,55 +403,11 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
 
     /**
      * Writes file-data from request in chunks to given file handle
-     * @param resource $fileHandle
      * @return int Returns number of transfered bytes
      */
-    protected function writeInputToFile(ServerRequestInterface $request, $fileHandle, bool $defer, int $offset, int $uploadLength): int
+    protected function writeInputToFile(ServerRequestInterface $request, SplFileObject $fileHandle, bool $defer, int $offset, int $uploadLength): int
     {
-        $bytesTransfered = 0;
-
-        $upload = $request->getBody()->detach();
-        if (!$upload) {
-            throw new ConflictException("No upload found");
-        }
-
-        /**
-         * Writing Input to Chunk
-         * This in-between step is necessary for checking checksums
-         * Reading input in chunks helps to support large files
-         */
-        try {
-            while (!$this->fileService->eof($upload)) {
-                $chunk = $this->fileService->read($upload, $this->chunkSize);
-
-                if ($chunk === "") {
-                    /**
-                     * Break loop if $chunk is empty
-                     */
-                    break;
-                }
-
-                $bytes = $this->fileService->write($fileHandle, $chunk);
-
-                $this->fileService->flush($fileHandle);
-
-                $bytesTransfered += $bytes;
-
-                if ($defer) {
-                    if ($offset + $bytesTransfered > $this->maxSize) {
-                        throw new ConflictException("Upload exceeds max allowed size");
-                    }
-                } else {
-                    if ($offset + $bytesTransfered > $uploadLength) {
-                        throw new ConflictException("Upload exceeds size limit");
-                    }
-                }
-            }
-        } finally {
-            $this->fileService->close($upload);
-        }
-
-        return $bytesTransfered;
+        return $this->fileService->copyFromStream($fileHandle, $request->getBody(), $this->chunkSize, ($defer ? $this->maxSize : $uploadLength) - $offset);
     }
 
     /**

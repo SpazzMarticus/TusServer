@@ -3,10 +3,14 @@
 namespace SpazzMarticus\Tus\Services;
 
 use SpazzMarticus\Tus\Exceptions\RuntimeException;
+use SpazzMarticus\Tus\Exceptions\ConflictException;
 use SplFileInfo;
+use SplFileObject;
+use Psr\Http\Message\StreamInterface;
 
 /**
  * @todo Use SplFileObject instead of f*-file-functions?
+ * @todo SplTempFileObject for Chunks?
  */
 final class FileService
 {
@@ -59,88 +63,41 @@ final class FileService
     }
 
     /**
-     * @return resource
+     * @return SplFileObject
      */
-    public function open(SplFileInfo $file)
+    public function open(SplFileInfo $file): SplFileObject
     {
-        $handle = fopen($file->getPathname(), 'rb+');
-        if (!$handle) {
-            throw new RuntimeException('Can not open file ' . $file->getPathname());
-        }
-        return $handle;
+        return new SplFileObject($file->getPathname(), 'rb+');
     }
 
-    /**
-     * @param resource $handle
-     */
-    public function point($handle, int $offset): void
+    public function point(SplFileObject $handle, int $offset): void
     {
-        if (fseek($handle, $offset) !== 0) {
+        if ($handle->fseek($offset) !== 0) {
             throw new RuntimeException('Can not set pointer in file');
         }
     }
-    /**
-     * @param resource $handle
-     */
-    public function read($handle, int $length): string
+
+
+    public function copyFromStream(SplFileObject $handle, StreamInterface $stream, int $chunkSize, ?int $sizeLimit = null): int
     {
-        return fread($handle, $length);
-    }
+        $bytesTransfered = 0;
 
-    /**
-     * @param resource $handle
-     */
-    public function write($handle, string $data): int
-    {
-        $bytes = fwrite($handle, $data);
-
-        if ($bytes === false || $bytes !== strlen($data)) {
-            throw new RuntimeException("Write error");
-        }
-
-        return $bytes;
-    }
-
-
-    /**
-     * @param resource $handle
-     */
-    public function eof($handle): bool
-    {
-        return feof($handle);
-    }
-
-    /**
-     * @param resource $to
-     */
-    public function copy($from, $to): int
-    {
-        $bytes = stream_copy_to_stream($from, $to);
-        if ($bytes === false) {
-            throw new RuntimeException('Failed to copy stream');
-        }
-        return $bytes;
-    }
-
-    /**
-     * @param resource $handle
-     */
-    public function flush($handle): void
-    {
-        if (!fflush($handle)) {
-            throw new RuntimeException("Flush error");
-        }
-    }
-
-    /**
-     * @param resource $handle
-     */
-    public function close($handle): void
-    {
         /**
-         * @todo Check for FALSE?
-         * @see Comments on https://www.php.net/manual/de/function.fclose
+         * Writing Input to Chunk
+         * This in-between step is necessary for checking checksums
+         * Reading input in chunks helps to support large files
          */
-        fclose($handle);
+        while (!$stream->eof()) {
+            $chunk = $stream->read($chunkSize);
+            $bytes = $handle->fwrite($chunk);
+            $handle->fflush();
+
+            $bytesTransfered += $bytes;
+
+            if ($sizeLimit && $bytesTransfered > $sizeLimit) {
+                throw new ConflictException("Upload exceeds max allowed size");
+            }
+        }
+        return $bytesTransfered;
     }
 }
