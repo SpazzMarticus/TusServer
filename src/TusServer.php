@@ -322,10 +322,10 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
         $this->fileService->point($fileHandle, $offset);
 
         try {
-            $bytesTransfered = $this->writeInputToFile($request, $this->useIntermediateChunk ? $chunkHandle : $fileHandle, $defer, $offset, $storage['length']);
+            $bytesTransfered = $this->fileService->copyFromStream($this->useIntermediateChunk ? $chunkHandle : $fileHandle, $request->getBody(), $this->chunkSize, ($defer ? $this->maxSize : $storage['length']) - $offset);
         } catch (ConflictException $e) {
             /**
-             * Delete upload on Conflict
+             * Delete upload on Conflict, because upload size was exceeded
              */
             $this->fileService->delete($targetFile);
             return $this->createResponse(409); //Conflict
@@ -398,15 +398,6 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
         }
 
         return $response;
-    }
-
-    /**
-     * Writes file-data from request in chunks to given file handle
-     * @return int Returns number of transfered bytes
-     */
-    protected function writeInputToFile(ServerRequestInterface $request, SplFileObject $fileHandle, bool $defer, int $offset, int $uploadLength): int
-    {
-        return $this->fileService->copyFromStream($fileHandle, $request->getBody(), $this->chunkSize, ($defer ? $this->maxSize : $uploadLength) - $offset);
     }
 
     /**
