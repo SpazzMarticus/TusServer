@@ -17,7 +17,7 @@ class ParameterLocationProviderTest extends AbstractLocationProviderTest
         $this->provider = new ParameterLocationProvider();
     }
 
-    public function testProvideLocation()
+    public function testProvideLocation(): void
     {
         $uuidString = '6e78f7aa-7e90-4f59-8701-ea925d340b5f';
         $uuid = Uuid::fromString($uuidString);
@@ -34,7 +34,7 @@ class ParameterLocationProviderTest extends AbstractLocationProviderTest
         return $request;
     }
 
-    public function testProvideValideUuid()
+    public function testProvideValideUuid(): void
     {
         $uuidString = 'e3d54709-becf-46c0-9bcb-a28b5622edd3';
         $uuid = Uuid::fromString($uuidString);
@@ -44,7 +44,7 @@ class ParameterLocationProviderTest extends AbstractLocationProviderTest
         $this->assertEquals($uuid, $this->provider->provideUuid($request));
     }
 
-    public function testProvideInvalidUuid()
+    public function testProvideInvalidUuid(): void
     {
         $request = $this->mockServerRequestInterface(['uuid' => 'this-will-definitly-not-work']);
 
@@ -52,7 +52,7 @@ class ParameterLocationProviderTest extends AbstractLocationProviderTest
         $this->provider->provideUuid($request);
     }
 
-    public function testProvideNoUuid()
+    public function testProvideNoUuid(): void
     {
         $request = $this->mockServerRequestInterface([]);
 

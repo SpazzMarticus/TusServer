@@ -10,7 +10,7 @@ abstract class AbstractLocationProvider implements LocationProviderInterface
     /**
      * @throws UnexpectedValueException
      */
-    protected function throwInvalid()
+    protected function throwInvalid(): void
     {
         throw new UnexpectedValueException('No, or invalid uuid given!');
     }

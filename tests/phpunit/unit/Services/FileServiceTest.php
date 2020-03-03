@@ -28,7 +28,7 @@ class FileServiceTest extends \PHPUnit\Framework\TestCase
         $this->fsRoot->addChild($this->fsDir);
     }
 
-    public function testInstance()
+    public function testInstance(): void
     {
         $this->assertSame(__FILE__, $this->fileService->instance(__FILE__)->getPathname());
     }
@@ -41,7 +41,7 @@ class FileServiceTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testInstance
      */
-    public function testCreateSuccess()
+    public function testCreateSuccess(): void
     {
         $file = $this->getTargetFile();
 
@@ -54,7 +54,7 @@ class FileServiceTest extends \PHPUnit\Framework\TestCase
      * @depends testInstance
      * @depends testCreateSuccess
      */
-    public function testCreateNoOverwrite()
+    public function testCreateNoOverwrite(): void
     {
         $this->fsDir->addChild(vfsStream::newFile('target.file'));
 
@@ -69,7 +69,7 @@ class FileServiceTest extends \PHPUnit\Framework\TestCase
     /**
      * @depends testInstance
      */
-    public function testCreateFailure()
+    public function testCreateFailure(): void
     {
         $this->fsDir->chmod(0000);
         $file = $this->getTargetFile();
@@ -84,7 +84,7 @@ class FileServiceTest extends \PHPUnit\Framework\TestCase
      * @depends testInstance
      * @depends testCreateSuccess
      */
-    public function testDeleteSuccess()
+    public function testDeleteSuccess(): void
     {
         $this->fsDir->addChild(vfsStream::newFile('target.file')->withContent('1234567'));
         $file = $this->getTargetFile();
@@ -98,7 +98,7 @@ class FileServiceTest extends \PHPUnit\Framework\TestCase
      * @depends testInstance
      * @depends testCreateSuccess
      */
-    public function testDeleteFailure()
+    public function testDeleteFailure(): void
     {
         $this->fsDir->addChild(vfsStream::newFile('target.file')->withContent('1234567'));
         /**
@@ -215,7 +215,7 @@ EOT,
      * @depends testInstance
      * @depends testCopyFromStream
      */
-    public function testCopyFromStreamSizeLimit()
+    public function testCopyFromStreamSizeLimit(): void
     {
         $content = '01020304050607080910';
         $chunkSize = 2;
@@ -233,7 +233,7 @@ EOT,
      * @depends testInstance
      * @depends testCreateSuccess
      */
-    public function testPointSuccess()
+    public function testPointSuccess(): void
     {
         $targetHandle = $this->getTargetHandle();
         $targetHandle->fwrite('0000-0000-0000-0000-0000');
@@ -248,7 +248,7 @@ EOT,
      * @depends testCreateSuccess
      * @depends testCopyFromStream
      */
-    public function testPointFailure()
+    public function testPointFailure(): void
     {
         $targetHandle = $this->getTargetHandle();
 

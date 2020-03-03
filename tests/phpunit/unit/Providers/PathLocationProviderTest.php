@@ -19,7 +19,7 @@ class PathLocationProviderTest extends AbstractLocationProviderTest
         $this->provider = new PathLocationProvider();
     }
 
-    public function testProvideLocation()
+    public function testProvideLocation(): void
     {
         $uuidString = '6e78f7aa-7e90-4f59-8701-ea925d340b5f';
         $uuid = Uuid::fromString($uuidString);
@@ -39,7 +39,7 @@ class PathLocationProviderTest extends AbstractLocationProviderTest
     /**
      * @dataProvider providerProvideUuid
      */
-    public function testProvideUuid(ServerRequestInterface $request, ?UuidInterface $uuid)
+    public function testProvideUuid(ServerRequestInterface $request, ?UuidInterface $uuid): void
     {
         /**
          * Test for UUID or UnexpectedValueException
