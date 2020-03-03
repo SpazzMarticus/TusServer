@@ -144,7 +144,10 @@ class FileServiceTest extends \PHPUnit\Framework\TestCase
 
     protected function chunkString(string $string, int $chunkSize): array
     {
-        return str_split($string, $chunkSize);
+        /**
+         * Chunk if chunk size > 0 
+         */
+        return $chunkSize > 0 ? str_split($string, $chunkSize) : [$string];
     }
 
     /**
@@ -168,6 +171,20 @@ class FileServiceTest extends \PHPUnit\Framework\TestCase
     public function providerCopyFromStream(): array
     {
         return [
+            /**
+             * Negative numbers...
+             */
+            [
+                '123456789',
+                -123
+            ],
+            /**
+             * and zero will result in reading whole file at once
+             */
+            [
+                '123456789',
+                0
+            ],
             [
                 '123456789',
                 1
@@ -227,6 +244,26 @@ EOT,
 
         $this->expectException(ConflictException::class);
         $this->fileService->copyFromStream($targetHandle, $stream, $chunkSize, $sizeLimit);
+    }
+
+    /**
+     * @depends testInstance
+     * @depends testCopyFromStream
+     */
+    public function testCopyFromStreamChunkSize(): void
+    {
+        $content = '01020304050607080910';
+        $chunkSize = 0;
+
+        $stream = $this->mockStream($this->chunkString($content, $chunkSize + 1));
+
+        $targetHandle = $this->getTargetHandle();
+
+        $bytesTransfered = $this->fileService->copyFromStream($targetHandle, $stream, $chunkSize);
+
+        $this->assertSame(strlen($content), $bytesTransfered);
+        $this->assertSame($bytesTransfered, $this->fileService->size($targetHandle));
+        $this->assertSame($content, file_get_contents($targetHandle->getPathname()));
     }
 
     /**
