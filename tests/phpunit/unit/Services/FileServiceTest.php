@@ -142,7 +142,7 @@ class FileServiceTest extends \PHPUnit\Framework\TestCase
         return $this->fileService->open($targetFile);
     }
 
-    protected function chunkString($string, $chunkSize): array
+    protected function chunkString(string $string, int $chunkSize): array
     {
         return str_split($string, $chunkSize);
     }
