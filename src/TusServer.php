@@ -25,7 +25,6 @@ use SpazzMarticus\Tus\Providers\LocationProviderInterface;
 use SpazzMarticus\Tus\Services\FileService;
 use SplFileInfo;
 use SplFileObject;
-use Throwable;
 
 /**
  * @todo Check for extensions/MIME? (Extension like TargetFileFactory? Can this be checked with first chunk?)

@@ -18,7 +18,7 @@ final class FileService
     public function create(SplFileInfo $file): void
     {
         if ($this->exists($file)) {
-            throw new RuntimeException('File ' . $file->getPathname() . ' already exists.');
+            throw new RuntimeException('File ' . $file->getPathname() . ' already exists');
         }
 
         //Psst! (fopen won't stop yapping without the magic @ duct-tape)
