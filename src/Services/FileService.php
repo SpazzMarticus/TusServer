@@ -8,10 +8,6 @@ use SplFileInfo;
 use SplFileObject;
 use Psr\Http\Message\StreamInterface;
 
-/**
- * @todo Use SplFileObject instead of f*-file-functions?
- * @todo SplTempFileObject for Chunks?
- */
 final class FileService
 {
     public function instance(string $path): SplFileInfo
@@ -21,7 +17,12 @@ final class FileService
 
     public function create(SplFileInfo $file): void
     {
-        if (file_put_contents($file->getPathname(), '') === false) {
+        if ($this->exists($file)) {
+            throw new RuntimeException('File ' . $file->getPathname() . ' already exists.');
+        }
+
+        //Psst! (fopen won't stop yapping without the magic @ duct-tape)
+        if (@fopen($file->getPathname(), 'w') === false) {
             throw new RuntimeException('File ' . $file->getPathname() . ' could not be created');
         }
     }
@@ -76,7 +77,6 @@ final class FileService
             throw new RuntimeException('Can not set pointer in file');
         }
     }
-
 
     public function copyFromStream(SplFileObject $handle, StreamInterface $stream, int $chunkSize, ?int $sizeLimit = null): int
     {
