@@ -92,7 +92,6 @@ final class FileService
          * Reading input in chunks helps to support large files
          */
         while (!$stream->eof()) {
-
             try {
                 $chunk = $stream->read($chunkSize);
             } catch (BaseRuntimeException $exception) {
