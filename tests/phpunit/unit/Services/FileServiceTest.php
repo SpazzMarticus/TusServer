@@ -145,7 +145,7 @@ class FileServiceTest extends \PHPUnit\Framework\TestCase
     protected function chunkString(string $string, int $chunkSize): array
     {
         /**
-         * Chunk if chunk size > 0 
+         * Chunk if chunk size > 0
          */
         return $chunkSize > 0 ? str_split($string, $chunkSize) : [$string];
     }

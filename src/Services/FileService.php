@@ -7,6 +7,7 @@ use SpazzMarticus\Tus\Exceptions\ConflictException;
 use SplFileInfo;
 use SplFileObject;
 use Psr\Http\Message\StreamInterface;
+use RuntimeException as BaseRuntimeException;
 
 final class FileService
 {
@@ -77,7 +78,10 @@ final class FileService
             throw new RuntimeException('Can not set pointer in file');
         }
     }
-
+    /**
+     * @throws RuntimeException
+     * @throws ConflictException if size limit is exceeded
+     */
     public function copyFromStream(SplFileObject $handle, StreamInterface $stream, int $chunkSize, ?int $sizeLimit = null): int
     {
         $bytesTransfered = 0;
@@ -88,9 +92,22 @@ final class FileService
          * Reading input in chunks helps to support large files
          */
         while (!$stream->eof()) {
-            $chunk = $stream->read($chunkSize);
+
+            try {
+                $chunk = $stream->read($chunkSize);
+            } catch (BaseRuntimeException $exception) {
+                throw new RuntimeException("Error when reading stream", 0, $exception);
+            }
+
             $bytes = $handle->fwrite($chunk);
-            $handle->fflush();
+
+            if ($bytes === 0) {
+                throw new RuntimeException("Error when writing file");
+            }
+
+            if ($handle->fflush() === false) {
+                throw new RuntimeException("Error when flushing file");
+            }
 
             $bytesTransfered += $bytes;
 
