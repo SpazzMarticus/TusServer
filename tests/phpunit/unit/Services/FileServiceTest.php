@@ -11,6 +11,7 @@ use SplFileInfo;
 use SplFileObject;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
+use RuntimeException as GlobalRuntimeException;
 
 class FileServiceTest extends \PHPUnit\Framework\TestCase
 {
@@ -161,7 +162,8 @@ class FileServiceTest extends \PHPUnit\Framework\TestCase
 
         $targetHandle = $this->getTargetHandle();
 
-        $bytesTransfered = $this->fileService->copyFromStream($targetHandle, $stream, $chunkSize);
+        $this->fileService->setChunkSize($chunkSize);
+        $bytesTransfered = $this->fileService->copyFromStream($targetHandle, $stream);
 
         $this->assertSame(strlen($content), $bytesTransfered);
         $this->assertSame($bytesTransfered, $this->fileService->size($targetHandle));
@@ -242,8 +244,10 @@ EOT,
 
         $targetHandle = $this->getTargetHandle();
 
+        $this->fileService->setChunkSize($chunkSize);
+
         $this->expectException(ConflictException::class);
-        $this->fileService->copyFromStream($targetHandle, $stream, $chunkSize, $sizeLimit);
+        $this->fileService->copyFromStream($targetHandle, $stream, $sizeLimit);
     }
 
     /**
@@ -259,12 +263,84 @@ EOT,
 
         $targetHandle = $this->getTargetHandle();
 
-        $bytesTransfered = $this->fileService->copyFromStream($targetHandle, $stream, $chunkSize);
+        $this->fileService->setChunkSize($chunkSize);
+        $bytesTransfered = $this->fileService->copyFromStream($targetHandle, $stream);
 
         $this->assertSame(strlen($content), $bytesTransfered);
         $this->assertSame($bytesTransfered, $this->fileService->size($targetHandle));
         $this->assertSame($content, file_get_contents($targetHandle->getPathname()));
     }
+    /**
+     * @depends testInstance
+     * @depends testCopyFromStream
+     */
+    public function testCopyFromStreamThrowingException(): void
+    {
+        $stream = M::mock(StreamInterface::class);
+
+        $stream->expects('eof')
+            ->once()
+            ->andReturn(false);
+
+        $stream->expects('read')
+            ->once()
+            ->andThrow(new GlobalRuntimeException("Test-Exception"));
+
+        $targetHandle = $this->getTargetHandle();
+
+        $this->expectException(RuntimeException::class);
+        $this->fileService->copyFromStream($targetHandle, $stream);
+    }
+    /**
+     * @depends testInstance
+     * @depends testCreateSuccess
+     * @depends testCopyFromStream
+     */
+    public function testCopyFromStreamWritingThrowsException(): void
+    {
+        $stream = $this->mockStream(['1234','5678']);
+
+        $file = $this->getTargetFile();
+
+        $this->fileService->create($file);
+
+        $targetHandle = M::mock(SplFileObject::class . '[fwrite]', [$file->getPathname()]);
+
+        $targetHandle->expects('fwrite')
+            ->once()
+            ->andReturn(0);
+
+        $this->expectException(RuntimeException::class);
+        $this->fileService->copyFromStream($targetHandle, $stream);
+    }
+
+    /**
+     * @depends testInstance
+     * @depends testCreateSuccess
+     * @depends testCopyFromStream
+     */
+    public function testCopyFromStreamFlushingThrowsException(): void
+    {
+        $stream = $this->mockStream(['1234','5678']);
+
+        $file = $this->getTargetFile();
+
+        $this->fileService->create($file);
+
+        $targetHandle = M::mock(SplFileObject::class . '[fwrite,fflush]', [$file->getPathname()]);
+
+        $targetHandle->expects('fwrite')
+        ->once()
+        ->andReturn(4);
+
+        $targetHandle->expects('fflush')
+            ->once()
+            ->andReturn(false);
+
+        $this->expectException(RuntimeException::class);
+        $this->fileService->copyFromStream($targetHandle, $stream);
+    }
+
 
     /**
      * @depends testInstance

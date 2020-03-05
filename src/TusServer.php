@@ -53,7 +53,6 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
      * Size Settings
      */
     protected int $maxSize = 1_073_741_824;
-    protected int $chunkSize = 1_048_576;
 
     /**
      * Settings for GET-calls
@@ -102,17 +101,6 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
     public function setMaxSize(int $maxSize): self
     {
         $this->maxSize = $maxSize;
-        return $this;
-    }
-    /**
-     * Limits the size read from the request and written to target file (or intermediate chunk file)
-     * (The upload is not split in multiple files.)
-     * @todo Give reasons for why this is important and test some more settings (with huge files)
-     * @param int $chunkSize
-     */
-    public function setChunkSize(int $chunkSize): self
-    {
-        $this->chunkSize = $chunkSize;
         return $this;
     }
 
@@ -322,7 +310,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
         $this->fileService->point($fileHandle, $offset);
 
         try {
-            $bytesTransfered = $this->fileService->copyFromStream($this->useIntermediateChunk ? $chunkHandle : $fileHandle, $request->getBody(), $this->chunkSize, ($defer ? $this->maxSize : $storage['length']) - $offset);
+            $bytesTransfered = $this->fileService->copyFromStream($this->useIntermediateChunk ? $chunkHandle : $fileHandle, $request->getBody(), ($defer ? $this->maxSize : $storage['length']) - $offset);
         } catch (ConflictException $e) {
             /**
              * Delete upload on Conflict, because upload size was exceeded
@@ -342,7 +330,6 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
                     $this->fileService->copyFromStream(
                         $fileHandle,
                         $this->streamFactory->createStreamFromFile($chunkFile->getPathname()),
-                        $this->chunkSize
                     ) !== $bytesTransfered
                 ) {
                     throw new RuntimeException('Error when copying ' . $chunkFile->getPathname() . ' to target file ' . $targetFile->getPathname());

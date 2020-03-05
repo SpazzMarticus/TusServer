@@ -11,6 +11,17 @@ use RuntimeException as BaseRuntimeException;
 
 final class FileService
 {
+    /**
+     * Size of chunks to transfer from stream
+     * @todo Give reasons for why this is important and test some more settings (with huge files)
+     */
+    protected int $chunkSize = 1_048_576;
+
+    public function setChunkSize(int $chunkSize)
+    {
+        $this->chunkSize = $chunkSize;
+    }
+
     public function instance(string $path): SplFileInfo
     {
         return new SplFileInfo($path);
@@ -79,7 +90,7 @@ final class FileService
      * @throws RuntimeException
      * @throws ConflictException if size limit is exceeded
      */
-    public function copyFromStream(SplFileObject $handle, StreamInterface $stream, int $chunkSize, ?int $sizeLimit = null): int
+    public function copyFromStream(SplFileObject $handle, StreamInterface $stream, ?int $sizeLimit = null): int
     {
         $bytesTransfered = 0;
 
@@ -90,7 +101,7 @@ final class FileService
          */
         while (!$stream->eof()) {
             try {
-                $chunk = $stream->read($chunkSize);
+                $chunk = $stream->read($this->chunkSize);
             } catch (BaseRuntimeException $exception) {
                 throw new RuntimeException("Error when reading stream", 0, $exception);
             }
@@ -100,7 +111,6 @@ final class FileService
             if ($bytes === 0) {
                 throw new RuntimeException("Error when writing file");
             }
-
             if ($handle->fflush() === false) {
                 throw new RuntimeException("Error when flushing file");
             }
