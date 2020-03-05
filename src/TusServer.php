@@ -327,7 +327,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
             /**
              * Delete upload on Conflict, because upload size was exceeded
              */
-            $this->fileService->delete($targetFile);
+            $this->tryDeleteFile($targetFile);
             return $this->createResponse(409); //Conflict
         }
 
@@ -359,7 +359,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
                  * Clean up and rethrow
                  */
                 unset($fileHandle);
-                $this->fileService->delete($chunkFile);
+                $this->tryDeleteFile($targetFile);
                 if ($exception) {
                     throw $exception;
                 }
@@ -370,12 +370,12 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
 
         if ($defer) {
             if ($offset + $bytesTransfered > $this->maxSize) {
-                $this->fileService->delete($targetFile);
+                $this->tryDeleteFile($targetFile);
                 return $this->createResponse(409, $response);
             }
         } else {
             if ($offset + $bytesTransfered !== $size) {
-                $this->fileService->delete($targetFile);
+                $this->tryDeleteFile($targetFile);
                 return $this->createResponse(409, $response);
             }
         }
@@ -496,5 +496,16 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
         }
 
         return $metadata;
+    }
+
+    protected function tryDeleteFile(SplFileInfo $file): void
+    {
+        try{
+            $this->fileService->delete($file);
+        }
+        catch(RuntimeException $exception)
+        {
+            $this->logger->notice('Could not delete file '.$file->getPathname());
+        }
     }
 }

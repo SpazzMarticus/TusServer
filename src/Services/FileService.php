@@ -55,9 +55,6 @@ final class FileService
         if ($this->exists($file)) {
             if (!unlink($file->getPathname())) {
                 if ($this->exists($file)) {
-                    /**
-                     * @todo Not handled in TusServer
-                     */
                     throw new RuntimeException("Could not delete file");
                 }
             }
