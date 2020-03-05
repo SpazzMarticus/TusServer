@@ -500,12 +500,10 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
 
     protected function tryDeleteFile(SplFileInfo $file): void
     {
-        try{
+        try {
             $this->fileService->delete($file);
-        }
-        catch(RuntimeException $exception)
-        {
-            $this->logger->notice('Could not delete file '.$file->getPathname());
+        } catch (RuntimeException $exception) {
+            $this->logger->notice('Could not delete file ' . $file->getPathname());
         }
     }
 }
