@@ -337,8 +337,6 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
             try {
                 /**
                  * @todo Test for huge files, test with apache/nginx, php built in is RAM hungry
-                 * @todo If chunk size is checked, no need to check again?
-                 * @todo Is StreamFactory fast (enough)?
                  */
                 if (
                     $this->fileService->copyFromStream(
@@ -347,9 +345,6 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
                         $this->chunkSize
                     ) !== $bytesTransfered
                 ) {
-                    /**
-                     * @todo Check needed?
-                     */
                     throw new RuntimeException('Error when copying ' . $chunkFile->getPathname() . ' to target file ' . $targetFile->getPathname());
                 }
             } catch (RuntimeException $t) {
