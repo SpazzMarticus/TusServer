@@ -106,6 +106,13 @@ final class FileService
                 throw new RuntimeException("Error when reading stream", 0, $exception);
             }
 
+            /**
+             * Break iteration if chunk is empty
+             */
+            if ($chunk === "") {
+                break;
+            }
+
             $bytes = $handle->fwrite($chunk);
 
             if ($bytes === 0) {
