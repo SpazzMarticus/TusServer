@@ -124,13 +124,17 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
+        $method = $this->getHeaderScalar($request, 'X-HTTP-Method-Override') ?? $request->getMethod();
+
         $clientVersion = $this->getHeaderScalar($request, 'Tus-Resumable');
 
-        if (!in_array($clientVersion, self::SUPPORTED_VERSIONS)) {
+        /**
+         * Check for supported versions. Get calls - since not part of protocol - do usually not include a client version
+         */
+        if (!in_array($clientVersion, self::SUPPORTED_VERSIONS) && $method !== 'GET') {
             return $this->createResponse(412); //Precondition Failed
         }
 
-        $method = $this->getHeaderScalar($request, 'X-HTTP-Method-Override') ?? $request->getMethod();
 
         switch ($method) {
             case 'OPTIONS':
