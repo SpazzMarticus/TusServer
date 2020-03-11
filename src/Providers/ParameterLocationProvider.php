@@ -20,7 +20,7 @@ class ParameterLocationProvider extends AbstractLocationProvider implements Loca
         try {
             return Uuid::fromString($request->getQueryParams()['uuid'] ?? '');
         } catch (InvalidUuidStringException $exception) {
-            $this->throwInvalid();
+            throw $this->getInvalidUuidException();
         }
     }
 }

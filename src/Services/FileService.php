@@ -17,7 +17,7 @@ final class FileService
      */
     protected int $chunkSize = 1_048_576;
 
-    public function setChunkSize(int $chunkSize)
+    public function setChunkSize(int $chunkSize): void
     {
         $this->chunkSize = $chunkSize;
     }

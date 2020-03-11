@@ -313,6 +313,10 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
         $this->fileService->point($fileHandle, $offset);
 
         try {
+            /**
+             * @psalm-suppress PossiblyUndefinedVariable
+             * $this->useIntermediateChunk is not altered while running this method.
+             */
             $bytesTransfered = $this->fileService->copyFromStream($this->useIntermediateChunk ? $chunkHandle : $fileHandle, $request->getBody(), ($defer ? $this->maxSize : $storage['length']) - $offset);
         } catch (ConflictException $e) {
             /**
@@ -328,6 +332,10 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
             try {
                 /**
                  * @todo Test for huge files, test with apache/nginx, php built in is RAM hungry
+                 */
+                /**
+                 * @psalm-suppress PossiblyUndefinedVariable
+                 * $this->useIntermediateChunk is not altered while running this method.
                  */
                 if (
                     $this->fileService->copyFromStream(

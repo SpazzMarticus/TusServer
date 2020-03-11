@@ -7,11 +7,8 @@ use SpazzMarticus\Tus\Exceptions\UnexpectedValueException;
 abstract class AbstractLocationProvider implements LocationProviderInterface
 {
 
-    /**
-     * @throws UnexpectedValueException
-     */
-    protected function throwInvalid(): void
+    protected function getInvalidUuidException(): UnexpectedValueException
     {
-        throw new UnexpectedValueException('No, or invalid uuid given!');
+        return new UnexpectedValueException('No, or invalid uuid given!');
     }
 }
