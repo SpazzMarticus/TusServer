@@ -6,13 +6,15 @@ use Psr\Http\Message\ServerRequestInterface;
 use Ramsey\Uuid\Exception\InvalidUuidStringException;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
+use Psr\Http\Message\UriInterface;
 
 class PathLocationProvider extends AbstractLocationProvider implements LocationProviderInterface
 {
 
-    public function provideLocation(UuidInterface $uuid): string
+    public function provideLocation(UuidInterface $uuid, ServerRequestInterface $request): UriInterface
     {
-        return $uuid->toString();
+        $uri = $request->getUri();
+        return $uri->withPath($uri->getPath() . '/' . $uuid->toString());
     }
 
     public function provideUuid(ServerRequestInterface $request): UuidInterface

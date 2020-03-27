@@ -233,7 +233,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
 
         //Created
         $response = $this->createResponse(201)
-            ->withHeader('Location', $this->locationProvider->provideLocation($uuid));
+            ->withHeader('Location', (string)$this->locationProvider->provideLocation($uuid, $request));
 
         if ($defer) {
             $response = $response->withHeader('Upload-Defer-Length', "1");

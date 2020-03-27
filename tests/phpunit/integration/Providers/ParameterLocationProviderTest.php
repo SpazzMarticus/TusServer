@@ -6,6 +6,8 @@ use Ramsey\Uuid\Uuid;
 use Mockery;
 use Psr\Http\Message\ServerRequestInterface;
 use SpazzMarticus\Tus\Exceptions\UnexpectedValueException;
+use Laminas\Diactoros\Uri;
+use Laminas\Diactoros\ServerRequest;
 
 class ParameterLocationProviderTest extends AbstractLocationProviderTest
 {
@@ -15,14 +17,31 @@ class ParameterLocationProviderTest extends AbstractLocationProviderTest
     public function setUp(): void
     {
         $this->provider = new ParameterLocationProvider();
+        parent::setUp();
     }
 
-    public function testProvideLocation(): void
+    public function testProvideLocationWithExistingQueryParams(): void
     {
         $uuidString = '6e78f7aa-7e90-4f59-8701-ea925d340b5f';
         $uuid = Uuid::fromString($uuidString);
 
-        $this->assertSame('?uuid=' . $uuidString, $this->provider->provideLocation($uuid));
+        $request = $this->getRequest(new Uri("https://www.example.org/path/to/application?param1=value1&param2&param3=value3"));
+
+        $expectedUri = new Uri("https://www.example.org/path/to/application?param1=value1&param2&param3=value3&uuid=6e78f7aa-7e90-4f59-8701-ea925d340b5f");
+
+        $this->assertEquals($expectedUri, $this->provider->provideLocation($uuid, $request));
+    }
+
+    public function testProvideLocationWithoutExistingQueryParams(): void
+    {
+        $uuidString = '6e78f7aa-7e90-4f59-8701-ea925d340b5f';
+        $uuid = Uuid::fromString($uuidString);
+
+        $request = $this->getRequest(new Uri("https://www.example.org/path/to/application"));
+
+        $expectedUri = new Uri("https://www.example.org/path/to/application?uuid=6e78f7aa-7e90-4f59-8701-ea925d340b5f");
+
+        $this->assertEquals($expectedUri, $this->provider->provideLocation($uuid, $request));
     }
 
     protected function mockServerRequestInterface(array $queryParams): ServerRequestInterface

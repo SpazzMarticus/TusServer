@@ -8,6 +8,8 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
 use Ramsey\Uuid\UuidInterface;
 use SpazzMarticus\Tus\Exceptions\UnexpectedValueException;
+use Laminas\Diactoros\Uri;
+use Laminas\Diactoros\ServerRequest;
 
 class PathLocationProviderTest extends AbstractLocationProviderTest
 {
@@ -17,6 +19,7 @@ class PathLocationProviderTest extends AbstractLocationProviderTest
     public function setUp(): void
     {
         $this->provider = new PathLocationProvider();
+        parent::setUp();
     }
 
     public function testProvideLocation(): void
@@ -24,7 +27,11 @@ class PathLocationProviderTest extends AbstractLocationProviderTest
         $uuidString = '6e78f7aa-7e90-4f59-8701-ea925d340b5f';
         $uuid = Uuid::fromString($uuidString);
 
-        $this->assertSame($uuidString, $this->provider->provideLocation($uuid));
+        $request = $this->getRequest(new Uri("https://www.example.org/path/to/application?param1=value1&param2&param3=value3"));
+
+        $expectedUri = new Uri("https://www.example.org/path/to/application/6e78f7aa-7e90-4f59-8701-ea925d340b5f?param1=value1&param2&param3=value3");
+
+        $this->assertEquals($expectedUri, $this->provider->provideLocation($uuid, $request));
     }
 
     protected function mockServerRequestInterface(string $path): ServerRequestInterface
