@@ -36,9 +36,9 @@ You can test `TusServer` by installing dev-dependencies (`composer install`) and
 php -S localhost:8000 example/server.php
 ```
 
-Open your browser, surf to [https://localhost:8000/](https://localhost:8000/) and use ([Uppy](https://uppy.io/)) to upload.
+Open your browser, surf to [localhost:8000/](http://localhost:8000/) and use ([Uppy](https://uppy.io/)) to upload.
 
-Uploads are stored at `example/uploads/...`, the filesystem cache at `example/cache/`. Surf to [https://localhost:8000/reset](https://localhost:8000/reset) to **permanently delete** both *uploads, intermediate chunks and the metadata-storage*. There may be a server log at `example/log/php-error.php` and a server log at `example/log/tus-server.log` containing some additional information.
+Uploads are stored at `example/uploads/...`, the filesystem cache at `example/cache/`. Surf to [localhost:8000/reset](http://localhost:8000/reset) to **permanently delete** both *uploads, intermediate chunks and the metadata-storage*. There may be a server log at `example/log/php-error.php` and a server log at `example/log/tus-server.log` containing some additional information.
 
 ## Examples
 
