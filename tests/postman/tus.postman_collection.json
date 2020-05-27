@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "6be1352d-5679-4b37-8779-b23a6a514c6e",
+		"_postman_id": "0694fc88-10e1-4ed2-a7bd-bde1d7c4fc87",
 		"name": "Tus",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -14,7 +14,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "ba449843-3248-4064-bdb8-5b8d3cd550d0",
+								"id": "beee16b9-ca66-4f9a-a734-6d7e604fb993",
 								"exec": [
 									"pm.test(\"Status code is 412\", function () {",
 									"    pm.response.to.have.status(412);",
@@ -32,7 +32,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "c4ba0597-fb20-4f2c-ac6e-799e610792ee",
+								"id": "2b6b2bbf-1353-4d20-9bb1-20afdaa11023",
 								"exec": [
 									"pm.environment.set(\"fileLocation\", \"?id=debugging\");"
 								],
@@ -75,7 +75,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "ba449843-3248-4064-bdb8-5b8d3cd550d0",
+								"id": "e9cfeb98-c420-442a-9a0a-59da54eb4488",
 								"exec": [
 									"pm.test(\"Status code is 404\", function () {",
 									"    pm.response.to.have.status(404);",
@@ -93,7 +93,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "c4ba0597-fb20-4f2c-ac6e-799e610792ee",
+								"id": "d776fe1e-808a-4c2b-bedc-a641512c5840",
 								"exec": [
 									"pm.environment.set(\"fileLocation\", \"?id=debugging\");"
 								],
@@ -130,7 +130,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "bf137460-befc-40a9-8f43-e6ed725b9a8c",
+								"id": "37bf0c0d-58d8-4be7-b985-de11420fc6af",
 								"exec": [
 									"pm.test(\"Status code is 404\", function () {",
 									"    pm.response.to.have.status(404);",
@@ -148,7 +148,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "81ae32b6-fee3-4eb2-9604-2879a3695134",
+								"id": "898268b4-fdfa-4303-be7e-fd6648d15713",
 								"exec": [
 									"pm.environment.set(\"fileLocation\", \"?id=debugging\");"
 								],
@@ -204,7 +204,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "bf137460-befc-40a9-8f43-e6ed725b9a8c",
+								"id": "96920c16-531e-48d0-a9c7-949f668cff3b",
 								"exec": [
 									"pm.test(\"Status code is 200\", function () {",
 									"    pm.response.to.have.status(200);",
@@ -237,7 +237,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "81ae32b6-fee3-4eb2-9604-2879a3695134",
+								"id": "1bf78181-dc7f-4355-92ab-901352cedaf0",
 								"exec": [
 									"pm.environment.set(\"fileLocation\", \"?id=debugging\");"
 								],
@@ -299,7 +299,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "5acb1612-cd37-47aa-9302-e74d6ca23dda",
+								"id": "85eb1672-d27c-4106-babd-5f1d4a21cbdf",
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -358,7 +358,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "bf137460-befc-40a9-8f43-e6ed725b9a8c",
+								"id": "a2c33ab8-b028-484b-b29e-1f6f94aa0e70",
 								"exec": [
 									"pm.test(\"Status code is 204\", function () {",
 									"    pm.response.to.have.status(204);",
@@ -407,12 +407,8 @@
 							"raw": "123"
 						},
 						"url": {
-							"raw": "localhost:8000/{{fileLocation}}",
+							"raw": "{{fileLocation}}",
 							"host": [
-								"localhost"
-							],
-							"port": "8000",
-							"path": [
 								"{{fileLocation}}"
 							]
 						},
@@ -426,7 +422,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "bf137460-befc-40a9-8f43-e6ed725b9a8c",
+								"id": "e1f21679-9cef-4132-930b-cdd568fea939",
 								"exec": [
 									"pm.test(\"Status code is 415\", function () {",
 									"    pm.response.to.have.status(415);",
@@ -461,12 +457,8 @@
 							"raw": "45"
 						},
 						"url": {
-							"raw": "localhost:8000/{{fileLocation}}",
+							"raw": "{{fileLocation}}",
 							"host": [
-								"localhost"
-							],
-							"port": "8000",
-							"path": [
 								"{{fileLocation}}"
 							]
 						},
@@ -480,7 +472,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "bf137460-befc-40a9-8f43-e6ed725b9a8c",
+								"id": "2578cf26-a86e-4af4-ae4a-dc9fe1878088",
 								"exec": [
 									"pm.test(\"Status code is 409\", function () {",
 									"    pm.response.to.have.status(409);",
@@ -520,12 +512,8 @@
 							"raw": "90"
 						},
 						"url": {
-							"raw": "localhost:8000/{{fileLocation}}",
+							"raw": "{{fileLocation}}",
 							"host": [
-								"localhost"
-							],
-							"port": "8000",
-							"path": [
 								"{{fileLocation}}"
 							]
 						},
@@ -539,7 +527,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "bf137460-befc-40a9-8f43-e6ed725b9a8c",
+								"id": "6c144f9a-5396-4557-84ec-d30d22bb5f1a",
 								"exec": [
 									"pm.test(\"Status code is 204\", function () {",
 									"    pm.response.to.have.status(204);",
@@ -579,12 +567,8 @@
 							}
 						],
 						"url": {
-							"raw": "localhost:8000/{{fileLocation}}",
+							"raw": "{{fileLocation}}",
 							"host": [
-								"localhost"
-							],
-							"port": "8000",
-							"path": [
 								"{{fileLocation}}"
 							]
 						},
@@ -598,7 +582,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "bf137460-befc-40a9-8f43-e6ed725b9a8c",
+								"id": "42396b5e-d1de-49aa-af44-bfac266fdf4b",
 								"exec": [
 									"pm.test(\"Status code is 204\", function () {",
 									"    pm.response.to.have.status(204);",
@@ -655,12 +639,8 @@
 							"raw": "45"
 						},
 						"url": {
-							"raw": "localhost:8000/{{fileLocation}}",
+							"raw": "{{fileLocation}}",
 							"host": [
-								"localhost"
-							],
-							"port": "8000",
-							"path": [
 								"{{fileLocation}}"
 							]
 						},
@@ -674,7 +654,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "ba449843-3248-4064-bdb8-5b8d3cd550d0",
+								"id": "fe9a36db-d8cc-4c64-9727-fd42d022508c",
 								"exec": [
 									"pm.test(\"Status code is 200\", function () {",
 									"    pm.response.to.have.status(200);",
@@ -700,7 +680,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "c4ba0597-fb20-4f2c-ac6e-799e610792ee",
+								"id": "c426e619-2528-470d-be6d-ba5c65dcb132",
 								"exec": [
 									""
 								],
@@ -710,18 +690,16 @@
 					],
 					"request": {
 						"method": "HEAD",
-						"header": [{
-							"key": "Tus-Resumable",
-							"value": "{{tusProtocolVersion}}",
-							"type": "text"
-						}],
+						"header": [
+							{
+								"key": "Tus-Resumable",
+								"value": "{{tusProtocolVersion}}",
+								"type": "text"
+							}
+						],
 						"url": {
-							"raw": "localhost:8000/{{fileLocation}}",
+							"raw": "{{fileLocation}}",
 							"host": [
-								"localhost"
-							],
-							"port": "8000",
-							"path": [
 								"{{fileLocation}}"
 							]
 						},
@@ -735,7 +713,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "bf137460-befc-40a9-8f43-e6ed725b9a8c",
+								"id": "be613683-2c0e-4f91-836c-77745e0f146d",
 								"exec": [
 									"pm.test(\"Status code is 204\", function () {",
 									"    pm.response.to.have.status(204);",
@@ -784,12 +762,8 @@
 							"raw": "67890"
 						},
 						"url": {
-							"raw": "localhost:8000/{{fileLocation}}",
+							"raw": "{{fileLocation}}",
 							"host": [
-								"localhost"
-							],
-							"port": "8000",
-							"path": [
 								"{{fileLocation}}"
 							]
 						},
@@ -803,7 +777,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "ba449843-3248-4064-bdb8-5b8d3cd550d0",
+								"id": "c5ab5919-11bf-4736-ae39-47e94dde808b",
 								"exec": [
 									"pm.test(\"Status code is 200\", function () {",
 									"    pm.response.to.have.status(200);",
@@ -829,7 +803,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "c4ba0597-fb20-4f2c-ac6e-799e610792ee",
+								"id": "4b2246c8-463f-478d-adaf-9352bf834a3a",
 								"exec": [
 									""
 								],
@@ -839,18 +813,16 @@
 					],
 					"request": {
 						"method": "HEAD",
-						"header": [{
-							"key": "Tus-Resumable",
-							"value": "{{tusProtocolVersion}}",
-							"type": "text"
-						}],
+						"header": [
+							{
+								"key": "Tus-Resumable",
+								"value": "{{tusProtocolVersion}}",
+								"type": "text"
+							}
+						],
 						"url": {
-							"raw": "localhost:8000/{{fileLocation}}",
+							"raw": "{{fileLocation}}",
 							"host": [
-								"localhost"
-							],
-							"port": "8000",
-							"path": [
 								"{{fileLocation}}"
 							]
 						},
@@ -864,7 +836,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "6eabf28e-431f-4818-940a-23e64740e287",
+								"id": "fdeb9bea-b55a-4cf3-9c30-c1c5d5c8d83d",
 								"exec": [
 									"pm.test(\"Status code is 200\", function () {",
 									"    pm.response.to.have.status(200);",
@@ -885,7 +857,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "89268fb8-507e-45e2-a6bc-8eb074368c84",
+								"id": "6d00ea5a-621b-4131-88ff-c60bad662d55",
 								"exec": [
 									""
 								],
@@ -895,18 +867,16 @@
 					],
 					"request": {
 						"method": "GET",
-						"header": [{
-							"key": "Tus-Resumable",
-							"value": "{{tusProtocolVersion}}",
-							"type": "text"
-						}],
+						"header": [
+							{
+								"key": "Tus-Resumable",
+								"value": "{{tusProtocolVersion}}",
+								"type": "text"
+							}
+						],
 						"url": {
-							"raw": "localhost:8000/{{fileLocation}}",
+							"raw": "{{fileLocation}}",
 							"host": [
-								"localhost"
-							],
-							"port": "8000",
-							"path": [
 								"{{fileLocation}}"
 							]
 						},
@@ -919,7 +889,7 @@
 				{
 					"listen": "prerequest",
 					"script": {
-						"id": "fa8feb6b-0cab-4a3a-9fe1-6b439338a301",
+						"id": "c114031e-a1e6-4abe-abdc-3ece96a512dd",
 						"type": "text/javascript",
 						"exec": [
 							""
@@ -929,7 +899,7 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "7a414d0b-c593-4ae6-bdcb-91f525399efe",
+						"id": "34f94724-63c9-481d-be22-2169590989c4",
 						"type": "text/javascript",
 						"exec": [
 							""
@@ -948,7 +918,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "5acb1612-cd37-47aa-9302-e74d6ca23dda",
+								"id": "da197323-e7df-403d-b067-41d974484df5",
 								"exec": [
 									"pm.test(\"Status code is 400\", function () {",
 									"    pm.response.to.have.status(400);",
@@ -998,7 +968,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "5acb1612-cd37-47aa-9302-e74d6ca23dda",
+								"id": "80e77816-ee78-4c75-a47a-cdacbbf681e5",
 								"exec": [
 									"pm.test(\"Status code is 201\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -1056,7 +1026,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "bf137460-befc-40a9-8f43-e6ed725b9a8c",
+								"id": "d540547c-b6ab-46f4-b257-1d293c8e758f",
 								"exec": [
 									"pm.test(\"Status code is 204\", function () {",
 									"    pm.response.to.have.status(204);",
@@ -1104,12 +1074,8 @@
 							"raw": "1234567"
 						},
 						"url": {
-							"raw": "localhost:8000/{{fileLocation}}",
+							"raw": "{{fileLocation}}",
 							"host": [
-								"localhost"
-							],
-							"port": "8000",
-							"path": [
 								"{{fileLocation}}"
 							]
 						},
@@ -1123,7 +1089,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "ba449843-3248-4064-bdb8-5b8d3cd550d0",
+								"id": "f02fc576-2a8e-4748-a878-647a4bdd163b",
 								"exec": [
 									"pm.test(\"Status code is 200\", function () {",
 									"    pm.response.to.have.status(200);",
@@ -1148,7 +1114,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "c4ba0597-fb20-4f2c-ac6e-799e610792ee",
+								"id": "45ef2661-c905-4a81-a359-20464b5eff7f",
 								"exec": [
 									""
 								],
@@ -1158,18 +1124,16 @@
 					],
 					"request": {
 						"method": "HEAD",
-						"header": [{
-							"key": "Tus-Resumable",
-							"value": "{{tusProtocolVersion}}",
-							"type": "text"
-						}],
+						"header": [
+							{
+								"key": "Tus-Resumable",
+								"value": "{{tusProtocolVersion}}",
+								"type": "text"
+							}
+						],
 						"url": {
-							"raw": "localhost:8000/{{fileLocation}}",
+							"raw": "{{fileLocation}}",
 							"host": [
-								"localhost"
-							],
-							"port": "8000",
-							"path": [
 								"{{fileLocation}}"
 							]
 						},
@@ -1183,7 +1147,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "bf137460-befc-40a9-8f43-e6ed725b9a8c",
+								"id": "04264476-854e-49da-97f2-7c494f2d02b9",
 								"exec": [
 									"pm.test(\"Status code is 204\", function () {",
 									"    pm.response.to.have.status(204);",
@@ -1235,12 +1199,8 @@
 							"raw": "890"
 						},
 						"url": {
-							"raw": "localhost:8000/{{fileLocation}}",
+							"raw": "{{fileLocation}}",
 							"host": [
-								"localhost"
-							],
-							"port": "8000",
-							"path": [
 								"{{fileLocation}}"
 							]
 						},
@@ -1254,7 +1214,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "ba449843-3248-4064-bdb8-5b8d3cd550d0",
+								"id": "428f425b-5c77-4207-b930-2b5c6239ade9",
 								"exec": [
 									"pm.test(\"Status code is 200\", function () {",
 									"    pm.response.to.have.status(200);",
@@ -1280,7 +1240,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "c4ba0597-fb20-4f2c-ac6e-799e610792ee",
+								"id": "8bdb53bc-a463-4753-b5ae-578356f3886d",
 								"exec": [
 									""
 								],
@@ -1290,18 +1250,16 @@
 					],
 					"request": {
 						"method": "HEAD",
-						"header": [{
-							"key": "Tus-Resumable",
-							"value": "{{tusProtocolVersion}}",
-							"type": "text"
-						}],
+						"header": [
+							{
+								"key": "Tus-Resumable",
+								"value": "{{tusProtocolVersion}}",
+								"type": "text"
+							}
+						],
 						"url": {
-							"raw": "localhost:8000/{{fileLocation}}",
+							"raw": "{{fileLocation}}",
 							"host": [
-								"localhost"
-							],
-							"port": "8000",
-							"path": [
 								"{{fileLocation}}"
 							]
 						},
@@ -1315,7 +1273,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "6eabf28e-431f-4818-940a-23e64740e287",
+								"id": "b8e1f28d-0db3-42a2-b4c1-507e9c68cc2e",
 								"exec": [
 									"pm.test(\"Status code is 200\", function () {",
 									"    pm.response.to.have.status(200);",
@@ -1336,7 +1294,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "89268fb8-507e-45e2-a6bc-8eb074368c84",
+								"id": "ea71ba84-64a0-4e11-af5a-6b85d0265cbc",
 								"exec": [
 									""
 								],
@@ -1346,18 +1304,16 @@
 					],
 					"request": {
 						"method": "GET",
-						"header": [{
-							"key": "Tus-Resumable",
-							"value": "{{tusProtocolVersion}}",
-							"type": "text"
-						}],
+						"header": [
+							{
+								"key": "Tus-Resumable",
+								"value": "{{tusProtocolVersion}}",
+								"type": "text"
+							}
+						],
 						"url": {
-							"raw": "localhost:8000/{{fileLocation}}",
+							"raw": "{{fileLocation}}",
 							"host": [
-								"localhost"
-							],
-							"port": "8000",
-							"path": [
 								"{{fileLocation}}"
 							]
 						},
@@ -1377,7 +1333,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "5acb1612-cd37-47aa-9302-e74d6ca23dda",
+								"id": "9152ca6a-3ed8-4759-a772-64bbab897f63",
 								"exec": [
 									"pm.test(\"Status code is 204\", function () {",
 									"    pm.response.to.have.status(204);",
@@ -1399,11 +1355,12 @@
 					],
 					"request": {
 						"method": "POST",
-						"header": [{
-							"key": "Tus-Resumable",
-							"value": "{{tusProtocolVersion}}",
-							"type": "text"
-						},
+						"header": [
+							{
+								"key": "Tus-Resumable",
+								"value": "{{tusProtocolVersion}}",
+								"type": "text"
+							},
 							{
 								"key": "Upload-Length",
 								"value": "10",
@@ -1449,7 +1406,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "ba449843-3248-4064-bdb8-5b8d3cd550d0",
+								"id": "82638a6e-7996-43c1-8fe5-200a666d5e15",
 								"exec": [
 									"pm.test(\"Status code is 200\", function () {",
 									"    pm.response.to.have.status(200);",
@@ -1475,7 +1432,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "c4ba0597-fb20-4f2c-ac6e-799e610792ee",
+								"id": "79b5c5e5-ac1b-4462-aebb-aa480ca8859a",
 								"exec": [
 									""
 								],
@@ -1485,18 +1442,16 @@
 					],
 					"request": {
 						"method": "HEAD",
-						"header": [{
-							"key": "Tus-Resumable",
-							"value": "{{tusProtocolVersion}}",
-							"type": "text"
-						}],
+						"header": [
+							{
+								"key": "Tus-Resumable",
+								"value": "{{tusProtocolVersion}}",
+								"type": "text"
+							}
+						],
 						"url": {
-							"raw": "localhost:8000/{{fileLocation}}",
+							"raw": "{{fileLocation}}",
 							"host": [
-								"localhost"
-							],
-							"port": "8000",
-							"path": [
 								"{{fileLocation}}"
 							]
 						},
@@ -1510,7 +1465,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "6eabf28e-431f-4818-940a-23e64740e287",
+								"id": "c0e75d5b-0dbe-47fe-ab88-3d01b84972be",
 								"exec": [
 									"pm.test(\"Status code is 200\", function () {",
 									"    pm.response.to.have.status(200);",
@@ -1531,7 +1486,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "89268fb8-507e-45e2-a6bc-8eb074368c84",
+								"id": "e2663beb-e9e4-43e3-953f-787dc4b0485c",
 								"exec": [
 									""
 								],
@@ -1541,18 +1496,16 @@
 					],
 					"request": {
 						"method": "GET",
-						"header": [{
-							"key": "Tus-Resumable",
-							"value": "{{tusProtocolVersion}}",
-							"type": "text"
-						}],
+						"header": [
+							{
+								"key": "Tus-Resumable",
+								"value": "{{tusProtocolVersion}}",
+								"type": "text"
+							}
+						],
 						"url": {
-							"raw": "localhost:8000/{{fileLocation}}",
+							"raw": "{{fileLocation}}",
 							"host": [
-								"localhost"
-							],
-							"port": "8000",
-							"path": [
 								"{{fileLocation}}"
 							]
 						},
