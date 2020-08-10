@@ -11,6 +11,7 @@
         }
     ],
     "require": {
+        "php": ">=7.4.0",
         "psr/event-dispatcher": "^1.0",
         "psr/http-factory": "^1.0",
         "psr/http-server-handler": "^1.0",
