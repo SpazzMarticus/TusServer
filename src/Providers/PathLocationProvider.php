@@ -14,7 +14,8 @@ class PathLocationProvider extends AbstractLocationProvider implements LocationP
     public function provideLocation(UuidInterface $uuid, ServerRequestInterface $request): UriInterface
     {
         $uri = $request->getUri();
-        return $uri->withPath($uri->getPath() . '/' . $uuid->toString());
+        $path = rtrim($uri->getPath(), '/');
+        return $uri->withPath($path . '/' . $uuid->toString());
     }
 
     public function provideUuid(ServerRequestInterface $request): UuidInterface
