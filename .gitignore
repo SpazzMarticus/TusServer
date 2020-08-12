@@ -1,4 +1,5 @@
 build/code-coverage/
+build/.phpunit.result.cache
 composer.lock
 example/chunks/
 example/*.log
