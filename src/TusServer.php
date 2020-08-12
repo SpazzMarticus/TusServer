@@ -171,7 +171,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
             return $this->createResponse(404);
         }
 
-        $storage = $this->storage->get($uuid->getHex());
+        $storage = $this->storage->get($uuid->getHex()->toString());
 
         if (!$storage) {
             return $this->createResponse(404);
@@ -222,12 +222,13 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
             'metadata' => $metadata,
             'file' => $targetFile->getPathname(),
         ];
-        $this->storage->set($uuid->getHex(), $storage);
+
+        $this->storage->set($uuid->getHex()->toString(), $storage);
 
         try {
             $this->fileService->create($targetFile);
         } catch (RuntimeException $exception) {
-            $this->storage->delete($uuid->getHex());
+            $this->storage->delete($uuid->getHex()->toString());
             throw $exception;
         }
 
@@ -267,7 +268,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
         /**
          * @var array $storage
          */
-        $storage = $this->storage->get($uuid->getHex());
+        $storage = $this->storage->get($uuid->getHex()->toString());
 
         if (!$storage) {
             return $this->createResponse(404);
@@ -283,7 +284,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
                 }
                 $storage['length'] = $length;
                 $storage['defer'] = $defer =  false;
-                $this->storage->set($uuid->getHex(), $storage);
+                $this->storage->set($uuid->getHex()->toString(), $storage);
             }
         }
 
@@ -305,7 +306,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
         }
 
         if ($this->useIntermediateChunk) {
-            $chunkFile = new SplFileInfo(tempnam($this->chunkDirectory, $uuid->getHex()));
+            $chunkFile = new SplFileInfo(tempnam($this->chunkDirectory, $uuid->getHex()->toString()));
             $chunkHandle = $this->fileService->open($chunkFile);
         }
 
@@ -385,7 +386,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
              * - Dispatch UploadComplete Event
              */
             $storage['complete'] = true;
-            $this->storage->set($uuid->getHex(), $storage, $this->storageTTLAfterUploadComplete);
+            $this->storage->set($uuid->getHex()->toString(), $storage, $this->storageTTLAfterUploadComplete);
 
             $this->eventDispatcher->dispatch(new UploadComplete($uuid, $targetFile, $storage['metadata']));
         }
@@ -409,7 +410,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
             return $this->createResponse(400);
         }
 
-        $storage = $this->storage->get($uuid->getHex());
+        $storage = $this->storage->get($uuid->getHex()->toString());
 
         if (!$storage) {
             return $this->createResponse(404);
