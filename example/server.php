@@ -13,7 +13,9 @@ use Cache\Adapter\Filesystem\FilesystemCachePool;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use SpazzMarticus\Tus\Factories\OriginalFilenameFactory;
+use SpazzMarticus\Tus\Factories\UuidFilenameFactory;
 use SpazzMarticus\Tus\Providers\ParameterLocationProvider;
+use SpazzMarticus\Tus\Providers\PathLocationProvider;
 
 ini_set('display_errors', "1");
 ini_set('display_startup_errors', "1");
@@ -92,10 +94,23 @@ $logger = new Logger('tus-server', [
  * Dependencies from this implementation:
  * - SpazzMarticus\Tus\Factories\FilenameFactoryInterface defines where the upload file should go
  * - SpazzMarticus\Tus\Factories\LocationProviderInterface defines the server endpoint, which should be used
+ * SpazzMarticus\Tus\Factories\FilenameFactoryInterface
+ * Defines where the upload should go
+ * - SpazzMarticus\Tus\Factories\OriginalFilenameFactory tries to keep the provided filename
+ * - SpazzMarticus\Tus\Factories\UuidFilenameFactory uses the uuid as a filename
  */
 
-$filenameFactory = new OriginalFilenameFactory($uploadDirectory);
-$locationProvider = new ParameterLocationProvider();
+// $filenameFactory = new OriginalFilenameFactory($uploadDirectory);
+$filenameFactory = new UuidFilenameFactory($uploadDirectory);
+
+/**
+ * SpazzMarticus\Tus\Factories\LocationProviderInterface
+ * Defines which uri the file parts should be sent at
+ * - SpazzMarticus\Tus\Providers\PathLocationProvider for ".../<uuid>"
+ * - SpazzMarticus\Tus\Providers\ParameterLocationProvider for "...?uuid=<uuid>"
+ */
+// $locationProvider = new ParameterLocationProvider();
+$locationProvider = new PathLocationProvider();
 
 /**
  * PSR-15 HTTP Server Request Handlers
