@@ -1,6 +1,6 @@
 # Tus - Server
 
-A **server** implementation of the [_"tus. io Resumable File Uploads"_](https://tus.io/) protocol using PSR HTTP standards. 
+A **server** implementation of the [_"tus.io Resumable File Uploads"_](https://tus.io/) protocol using PSR HTTP standards. 
 
 ## Installation
 
@@ -58,7 +58,7 @@ Automated testing is done with:
 
 ## Cache as storage?!
 
-`TusServer` needs something fast to store metadata about uploads. Since the payload is small and performance is important caches can be used. 
+`TusServer` needs something fast to store metadata about uploads. Since the payload is small and performance is important, caches can be used. 
 
 Instead of using a volatile cache only, you should use a chain containing both a fast volatile **and** a slower non-volatile cache. (Losing the metadata mid-upload does not allow for resuming uploads. )
 
@@ -75,4 +75,4 @@ Instead of using a volatile cache only, you should use a chain containing both a
 
 ## Alternatives
 
-* [ankitpokhrel/tus-php](https://github.com/ankitpokhrel/tus-php) - Did not provide enough flexibility for my needs and is the reason I decided to start my own implementation. (Provides a php tus-client, if you are looking for that. )
+* [ankitpokhrel/tus-php](https://github.com/ankitpokhrel/tus-php) - Did not provide enough flexibility for my needs and is the reason I decided to start my own implementation. (Provides a php tus-client, if you are looking for that.)
