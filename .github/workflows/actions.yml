@@ -5,6 +5,9 @@ on: [push, pull_request]
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-versions: ['7.4', '8.0']
     steps:
       - uses: actions/checkout@v1
       - uses: actions/setup-node@v1
@@ -12,7 +15,7 @@ jobs:
           node-version: '10.x'
       - uses: shivammathur/setup-php@v1
         with:
-          php-version: '7.4'
+          php-version: ${{ matrix.php-versions }}
       - name: Installing composer dependencies
         run: composer install --prefer-source --no-interaction --no-progress --optimize-autoloader
       - name: Check for PSR-12 coding style
