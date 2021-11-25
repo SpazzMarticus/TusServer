@@ -3,22 +3,35 @@ name: Lint and test
 on: [push, pull_request, workflow_dispatch]
 
 jobs:
-  test:
+  install:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - uses: actions/setup-node@v1
-        with:
-          node-version: '10.x'
+
       - uses: shivammathur/setup-php@v1
         with:
           php-version: '7.4'
       - name: Installing composer dependencies
         run: composer install --prefer-source --no-interaction --no-progress --optimize-autoloader
+  lint:
+    needs: install
+    runs-on: ubuntu-latest
+    steps:
       - name: Check for PSR-12 coding style
         run: vendor/bin/phpcs --runtime-set ignore_warnings_on_exit true --standard=PSR12 src/ example/ tests/
+  test-php:
+    needs: install
+    runs-on: ubuntu-latest
+    steps:
       - name: PHPUnit
         run: vendor/bin/phpunit -c build/phpunit.xml
+  test-newman:
+    needs: install
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '10.x'
       - name: Installing npm dependencies (for testing only)
         run: npm install
       - name: Run PHP built-in webserver (in background)
