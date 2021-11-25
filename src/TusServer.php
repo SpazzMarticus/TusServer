@@ -353,7 +353,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
                  * Clean up and rethrow
                  */
                 unset($fileHandle);
-                $this->tryDeleteFile($targetFile);
+                $this->tryDeleteFile($chunkFile);
                 if ($exception) {
                     throw $exception;
                 }
