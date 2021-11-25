@@ -14,15 +14,11 @@ use RuntimeException;
 
 class ExampleMiddleware implements MiddlewareInterface
 {
-    
+
     protected ResponseFactoryInterface $responseFactory;
-  
     protected StreamFactoryInterface $streamFactory;
-
     protected string $uploadDirectory;
-
     protected string $chunkDirectory;
-    
     protected string $storageDirectory;
 
     public function __construct(ResponseFactoryInterface $responseFactory, StreamFactoryInterface $streamFactory, string $uploadDirectory, string $chunkDirectory, string $storageDirectory)
