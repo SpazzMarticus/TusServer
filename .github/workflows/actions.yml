@@ -20,13 +20,13 @@ jobs:
       - name: Check for PSR-12 coding style
         run: vendor/bin/phpcs --runtime-set ignore_warnings_on_exit true --standard=PSR12 src/ example/ tests/
   test-php:
-    needs: install
+    needs: lint
     runs-on: ubuntu-latest
     steps:
       - name: PHPUnit
         run: vendor/bin/phpunit -c build/phpunit.xml
   test-newman:
-    needs: install
+    needs: lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/setup-node@v1
