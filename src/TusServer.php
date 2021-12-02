@@ -178,6 +178,12 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
         }
 
         $targetFile = $this->fileService->instance($storage['file']);
+        
+        if(!$this->fileService->exists($targetFile)) {
+            $this->storage->delete($uuid->getHex()->toString());
+            return $this->createResponse(404);
+        }
+        
         $size = $this->fileService->size($targetFile);
 
         $response = $this->createResponse(200)
