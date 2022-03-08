@@ -9,7 +9,7 @@ jobs:
       - uses: actions/checkout@v1
       - uses: actions/setup-node@v1
         with:
-          node-version: '10.x'
+          node-version: '16.x'
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '7.4'
@@ -34,7 +34,7 @@ jobs:
             ${{ runner.os }}-build-
             ${{ runner.os }}-
       - name: Installing npm dependencies (for testing only)
-        run: npm install
+        run: npm ci
       - name: Run PHP built-in webserver (in background) and newman tests
         run: php -S localhost:8000 example/server.php &
       - name: Run newman tests
