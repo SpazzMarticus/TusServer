@@ -23,6 +23,7 @@ use SpazzMarticus\Tus\Exceptions\RuntimeException;
 use SpazzMarticus\Tus\Factories\FilenameFactoryInterface;
 use SpazzMarticus\Tus\Providers\LocationProviderInterface;
 use SpazzMarticus\Tus\Services\FileService;
+use SpazzMarticus\Tus\Services\MetadataService;
 use SplFileInfo;
 
 /**
@@ -47,6 +48,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
     protected FileService $fileService;
     protected FilenameFactoryInterface $targetFileFactory;
     protected LocationProviderInterface $locationProvider;
+    protected MetadataService $metadataService;
 
     /**
      * Size Settings
@@ -82,6 +84,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
         $this->fileService = new FileService();
         $this->targetFileFactory = $targetFileFactory;
         $this->locationProvider = $locationProvider;
+        $this->metadataService = new MetadataService();
     }
 
     /**
@@ -213,7 +216,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
 
         $uuid = Uuid::uuid4();
 
-        $metadata = $this->getMetadata($request);
+        $metadata = $this->metadataService->getMetadata($request);
 
         $targetFile = $this->targetFileFactory->generateFilename($uuid, $metadata);
 
@@ -474,32 +477,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
      */
     protected function getHeaderScalar(RequestInterface $request, string $key): ?string
     {
-        if ($request->hasHeader($key)) {
-            return $request->getHeader($key)[0];
-        }
-        return null;
-    }
-
-    /**
-     * Extract metadata-arry from request
-     * @see https://tus.io/protocols/resumable-upload.html#upload-metadata
-     */
-    protected function getMetadata(RequestInterface $request): array
-    {
-        $metadata = [];
-        $metadataHeader = $this->getHeaderScalar($request, 'Upload-Metadata') ?? null;
-
-        if ($metadataHeader) {
-            foreach (explode(',', $metadataHeader) as $keyValuePair) {
-                $keyValuePair = explode(' ', $keyValuePair);
-                if (!isset($keyValuePair[0])) {
-                    continue;
-                }
-                $metadata[$keyValuePair[0]] = isset($keyValuePair[1]) ? base64_decode($keyValuePair[1]) : null;
-            }
-        }
-
-        return $metadata;
+        return $request->getHeaderLine($key) ?: null;
     }
 
     protected function tryDeleteFile(SplFileInfo $file): void

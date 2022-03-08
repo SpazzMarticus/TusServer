@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## Unreleased
+
+### Changed
+- `getMetadata` moved to `MetadataService`
+
 ## [1.0.3] - 2021-12-02
 
 ### Fixed

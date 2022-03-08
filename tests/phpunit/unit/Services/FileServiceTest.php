@@ -2,7 +2,7 @@
 
 namespace SpazzMarticus\Tus\Services;
 
-use Mockery as M;
+use Mockery;
 use Psr\Http\Message\StreamInterface;
 use SpazzMarticus\Tus\Exceptions\ConflictException;
 use SpazzMarticus\Tus\Exceptions\RuntimeException;
@@ -118,7 +118,7 @@ class FileServiceTest extends \PHPUnit\Framework\TestCase
 
     protected function mockStream(array $chunks): StreamInterface
     {
-        $stream = M::mock(StreamInterface::class);
+        $stream = Mockery::mock(StreamInterface::class);
 
         $count = count($chunks);
         $eof = array_fill(0, $count, false);
@@ -276,7 +276,7 @@ EOT,
      */
     public function testCopyFromStreamThrowingException(): void
     {
-        $stream = M::mock(StreamInterface::class);
+        $stream = Mockery::mock(StreamInterface::class);
 
         $stream->expects('eof')
             ->once()
@@ -304,7 +304,7 @@ EOT,
 
         $this->fileService->create($file);
 
-        $targetHandle = M::mock(SplFileObject::class . '[fwrite]', [$file->getPathname()]);
+        $targetHandle = Mockery::mock(SplFileObject::class . '[fwrite]', [$file->getPathname()]);
 
         $targetHandle->expects('fwrite')
             ->once()
@@ -327,7 +327,7 @@ EOT,
 
         $this->fileService->create($file);
 
-        $targetHandle = M::mock(SplFileObject::class . '[fwrite,fflush]', [$file->getPathname()]);
+        $targetHandle = Mockery::mock(SplFileObject::class . '[fwrite,fflush]', [$file->getPathname()]);
 
         $targetHandle->expects('fwrite')
         ->once()
