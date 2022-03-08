@@ -16,7 +16,7 @@ jobs:
       - name: Installing composer dependencies
         run: composer install --prefer-source --no-interaction --no-progress --optimize-autoloader
       - name: Check for PSR-12 coding style
-        run: vendor/bin/phpcs --runtime-set ignore_warnings_on_exit true --standard=PSR12 src/ example/ tests/
+        run: vendor/bin/phpcs --standard=phpcs.xml
       - name: PHPUnit
         run: vendor/bin/phpunit -c build/phpunit.xml
       - name: Installing npm dependencies (for testing only)
