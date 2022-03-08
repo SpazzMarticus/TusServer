@@ -14,7 +14,6 @@ use RuntimeException;
 
 class ExampleMiddleware implements MiddlewareInterface
 {
-
     protected ResponseFactoryInterface $responseFactory;
     protected StreamFactoryInterface $streamFactory;
     protected string $uploadDirectory;

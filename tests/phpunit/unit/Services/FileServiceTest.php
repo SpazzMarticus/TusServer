@@ -15,7 +15,6 @@ use RuntimeException as GlobalRuntimeException;
 
 class FileServiceTest extends \PHPUnit\Framework\TestCase
 {
-
     protected FileService $fileService;
     protected vfsStreamDirectory $fsRoot;
     protected vfsStreamDirectory $fsDir;

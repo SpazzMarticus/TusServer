@@ -7,7 +7,6 @@ use SpazzMarticus\Tus\Factories\UuidFilenameFactory;
 
 class UuidFilenameFactoryTest extends AbstractFilenameFactoryTest
 {
-
     protected UuidFilenameFactory $factory;
 
     public function setUp(): void

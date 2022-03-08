@@ -6,7 +6,6 @@ use Psr\Http\Message\RequestInterface;
 
 class MetadataService
 {
-
     /**
      * Extract metadata-arry from request
      * @see https://tus.io/protocols/resumable-upload.html#upload-metadata

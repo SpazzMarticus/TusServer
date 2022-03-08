@@ -7,7 +7,6 @@ use SpazzMarticus\Tus\Factories\OriginalFilenameFactory;
 
 class OriginalFilenameFactoryTest extends AbstractFilenameFactoryTest
 {
-
     protected OriginalFilenameFactory $factory;
 
     public function setUp(): void

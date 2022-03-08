@@ -10,8 +10,8 @@
         "url": "https://github.com/SpazzMarticus/tus/issues"
     },
     "homepage": "https://github.com/SpazzMarticus/tus#readme",
-    "dependencies": {
-        "newman": "^4.5.7"
-    },
-    "private": true
+    "private": true,
+    "devDependencies": {
+        "newman": "^5.3.2"
+    }
 }
