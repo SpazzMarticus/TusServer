@@ -2,8 +2,14 @@
 
 ## Unreleased
 
+## [1.1.0] - 2022-03-08
+
 ### Changed
 - `getMetadata` moved to `MetadataService`
+- (GH Actions streamlined)
+
+### Fixed
+- PSR-12 formatting
 
 ## [1.0.3] - 2021-12-02
 
