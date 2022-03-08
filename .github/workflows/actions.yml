@@ -6,6 +6,13 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '16.x'
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
       - name: Get Composer Cache Directory
         id: get-composer-cache-dir # Instead of composer-cache
         run: |
@@ -20,14 +27,6 @@ jobs:
             ${{ runner.os }}-composer-
       - name: Install composer dependencies
         if: steps.composer-cache.outputs.cache-hit != 'true'
-      - uses: actions/checkout@v1
-      - uses: actions/setup-node@v1
-        with:
-          node-version: '16.x'
-      - uses: shivammathur/setup-php@v2
-        with:
-          php-version: '7.4'
-      - name: Installing composer dependencies
         run: composer install --prefer-source --no-interaction --no-progress --optimize-autoloader
       - name: Check for PSR-12 coding style
         run: vendor/bin/phpcs --standard=phpcs.xml
