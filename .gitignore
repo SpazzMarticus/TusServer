@@ -6,5 +6,4 @@ example/*.log
 example/storage/
 example/uploads/
 node_modules/
-package-lock.json
 vendor/
