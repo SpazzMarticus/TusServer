@@ -28,6 +28,10 @@ jobs:
       - name: Install composer dependencies
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: composer install --prefer-source --no-interaction --no-progress --optimize-autoloader
+      - name: PSR-12 fix
+        run: vendor/bin/phpcbf --standard=phpcs.xml
+      - name: Show diff
+        run: git diff
       - name: Check for PSR-12 coding style
         run: vendor/bin/phpcs --standard=phpcs.xml
       - name: PHPUnit
