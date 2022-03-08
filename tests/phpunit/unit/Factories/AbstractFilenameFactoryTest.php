@@ -9,7 +9,6 @@ use Ramsey\Uuid\Uuid;
 
 abstract class AbstractFilenameFactoryTest extends TestCase
 {
-
     protected string $directory;
     protected UuidInterface $uuid;
 

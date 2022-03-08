@@ -7,7 +7,6 @@ use Psr\Http\Message\RequestInterface;
 
 class MetadataServiceTest extends \PHPUnit\Framework\TestCase
 {
-
     protected MetadataService $metadataService;
 
     public function setUp(): void
