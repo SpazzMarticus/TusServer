@@ -36,6 +36,6 @@ jobs:
       - name: Installing npm dependencies (for testing only)
         run: npm ci
       - name: Run PHP built-in webserver (in background) and newman tests
-        run: php -S localhost:8000 example/server.php &
-      - name: Run newman tests
-        run: node node_modules/newman/bin/newman.js run -e tests/postman/tus.postman_environment.json tests/postman/tus.postman_collection.json --bail
+        run: | 
+          php -S localhost:8000 example/server.php & 
+          node node_modules/newman/bin/newman.js run -e tests/postman/tus.postman_environment.json tests/postman/tus.postman_collection.json --bail
