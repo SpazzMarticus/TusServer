@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## [1.1.1] - 2022-04-06
+
 ### Dependencies
 - Bump minimist from 1.2.5 to 1.2.6 (#4)
 
