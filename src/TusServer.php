@@ -446,7 +446,8 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
             ->withHeader('Content-Disposition', 'attachment; filename="' . $targetFile->getFilename() . '"')
             ->withHeader('Content-Transfer-Encoding', 'binary');
 
-        if (isset($metadataType = $storage['metadata']['type'])) {
+        if (isset($storage['metadata']['type'])) {
+            $metadataType = $storage['metadata']['type'];
             if (
                 is_string($metadataType)
                 || (
