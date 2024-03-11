@@ -18,7 +18,7 @@ jobs:
         with:
           composer-options: "--no-interaction --no-progress --optimize-autoloader"
       - name: Check for coding style
-        run: vendor/bin/php-cs-fixer
+        run: vendor/bin/php-cs-fixer fix --dry-run
       - name: PHPUnit
         run: vendor/bin/phpunit -c build/phpunit.xml
       - name: Installing npm dependencies (for testing only)
