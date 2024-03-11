@@ -36,20 +36,10 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
     use LoggerAwareTrait;
 
     protected const SUPPORTED_VERSIONS = ['1.0.0'];
-
-    /**
-     * PSR-Dependencies
-     */
-    protected ResponseFactoryInterface $responseFactory;
-    protected StreamFactoryInterface $streamFactory;
-    protected CacheInterface $storage;
-    protected EventDispatcherInterface $eventDispatcher;
     /**
      * Package-Dependencies
      */
     protected FileService $fileService;
-    protected FilenameFactoryInterface $targetFileFactory;
-    protected LocationProviderInterface $locationProvider;
     protected MetadataService $metadataService;
 
     /**
@@ -71,21 +61,18 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
     protected string $chunkDirectory = '';
 
     public function __construct(
-        ResponseFactoryInterface $responseFactory,
-        StreamFactoryInterface $streamFactory,
-        CacheInterface $storage,
-        EventDispatcherInterface $eventDispatcher,
-        FilenameFactoryInterface $targetFileFactory,
-        LocationProviderInterface $locationProvider
+        /**
+         * PSR-Dependencies
+         */
+        protected ResponseFactoryInterface $responseFactory,
+        protected StreamFactoryInterface $streamFactory,
+        protected CacheInterface $storage,
+        protected EventDispatcherInterface $eventDispatcher,
+        protected FilenameFactoryInterface $targetFileFactory,
+        protected LocationProviderInterface $locationProvider
     ) {
         $this->logger = new NullLogger();
-        $this->responseFactory = $responseFactory;
-        $this->streamFactory = $streamFactory;
-        $this->storage = $storage;
-        $this->eventDispatcher = $eventDispatcher;
         $this->fileService = new FileService();
-        $this->targetFileFactory = $targetFileFactory;
-        $this->locationProvider = $locationProvider;
         $this->metadataService = new MetadataService();
     }
 
@@ -111,7 +98,6 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
     /**
      * Serves uploaded file on GET-calls
      * (not part of tus.io-Protocol)
-     * @param bool $allow
      * @param int $ttl Restricts calls by time to live, ticking from completion of the upload
      * @param bool $allowPartial Restricts calls to complete files
      */
@@ -138,26 +124,14 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
         if (!in_array($clientVersion, self::SUPPORTED_VERSIONS) && $method !== 'GET') {
             return $this->createResponse(412); //Precondition Failed
         }
-
-
-        switch ($method) {
-            case 'OPTIONS':
-                return $this->handleOptions($request);
-                break;
-            case 'HEAD':
-                return $this->handleHead($request);
-                break;
-            case 'POST':
-                return $this->handlePost($request);
-                break;
-            case 'PATCH':
-                return $this->handlePatch($request);
-                break;
-            case 'GET':
-                return $this->handleGet($request);
-                break;
-        }
-        return $this->createResponse(400); //Bad Request
+        return match ($method) {
+            'OPTIONS' => $this->handleOptions($request),
+            'HEAD' => $this->handleHead($request),
+            'POST' => $this->handlePost($request),
+            'PATCH' => $this->handlePatch($request),
+            'GET' => $this->handleGet($request),
+            default => $this->createResponse(400),
+        }; //Bad Request
     }
 
     protected function handleOptions(ServerRequestInterface $request): ResponseInterface
@@ -172,7 +146,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
     {
         try {
             $uuid = $this->locationProvider->provideUuid($request);
-        } catch (UnexpectedValueException $t) {
+        } catch (UnexpectedValueException) {
             return $this->createResponse(404);
         }
 
@@ -271,7 +245,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
         if (!$uuid) {
             try {
                 $uuid = $this->locationProvider->provideUuid($request);
-            } catch (UnexpectedValueException $t) {
+            } catch (UnexpectedValueException) {
                 return $this->createResponse(404);
             }
         }
@@ -330,7 +304,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
              * $this->useIntermediateChunk is not altered while running this method.
              */
             $bytesTransfered = $this->fileService->copyFromStream($this->useIntermediateChunk ? $chunkHandle : $fileHandle, $request->getBody(), ($defer ? $this->maxSize : $storage['length']) - $offset);
-        } catch (ConflictException $e) {
+        } catch (ConflictException) {
             /**
              * Delete upload on Conflict, because upload size was exceeded
              */
@@ -421,7 +395,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
 
         try {
             $uuid = $this->locationProvider->provideUuid($request);
-        } catch (UnexpectedValueException $t) {
+        } catch (UnexpectedValueException) {
             return $this->createResponse(400);
         }
 
@@ -486,7 +460,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
     {
         try {
             $this->fileService->delete($file);
-        } catch (RuntimeException $exception) {
+        } catch (RuntimeException) {
             $this->logger->notice('Could not delete file ' . $file->getPathname());
         }
     }

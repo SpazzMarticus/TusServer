@@ -26,7 +26,7 @@ class PathLocationProvider extends AbstractLocationProvider implements LocationP
 
         try {
             return Uuid::fromString($parts[array_key_last($parts)]);
-        } catch (InvalidUuidStringException $exception) {
+        } catch (InvalidUuidStringException) {
             throw $this->getInvalidUuidException();
         }
     }

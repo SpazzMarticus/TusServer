@@ -12,20 +12,7 @@ abstract class TusEvent implements StoppableEventInterface
 {
     private bool $propagationStopped = false;
 
-    protected UuidInterface $uuid;
-    protected SplFileInfo $file;
-
-    /**
-     * @var array
-     */
-    protected array $metadata;
-
-    public function __construct(UuidInterface $uuid, SplFileInfo $file, array $metadata)
-    {
-        $this->uuid = $uuid;
-        $this->file = $file;
-        $this->metadata = $metadata;
-    }
+    public function __construct(protected UuidInterface $uuid, protected SplFileInfo $file, protected array $metadata) {}
 
     public function getUuid(): UuidInterface
     {

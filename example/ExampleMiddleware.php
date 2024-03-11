@@ -16,20 +16,7 @@ use RuntimeException;
 
 class ExampleMiddleware implements MiddlewareInterface
 {
-    protected ResponseFactoryInterface $responseFactory;
-    protected StreamFactoryInterface $streamFactory;
-    protected string $uploadDirectory;
-    protected string $chunkDirectory;
-    protected string $storageDirectory;
-
-    public function __construct(ResponseFactoryInterface $responseFactory, StreamFactoryInterface $streamFactory, string $uploadDirectory, string $chunkDirectory, string $storageDirectory)
-    {
-        $this->responseFactory = $responseFactory;
-        $this->streamFactory = $streamFactory;
-        $this->uploadDirectory = $uploadDirectory;
-        $this->chunkDirectory = $chunkDirectory;
-        $this->storageDirectory = $storageDirectory;
-    }
+    public function __construct(protected ResponseFactoryInterface $responseFactory, protected StreamFactoryInterface $streamFactory, protected string $uploadDirectory, protected string $chunkDirectory, protected string $storageDirectory) {}
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
@@ -69,7 +56,7 @@ class ExampleMiddleware implements MiddlewareInterface
     private function deleteDirectories(string $dir): void
     {
         if (is_dir($dir)) {
-            $it = new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS);
+            $it = new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS | \FilesystemIterator::SKIP_DOTS);
             $files = new RecursiveIteratorIterator(
                 $it,
                 RecursiveIteratorIterator::CHILD_FIRST
