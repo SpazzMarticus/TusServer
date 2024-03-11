@@ -6,15 +6,15 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '16'
           cache: 'npm'
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: '7.4'
-      - uses: "ramsey/composer-install@v2"
+          php-version: '8.2'
+      - uses: "ramsey/composer-install@v3"
         with:
           composer-options: "--no-interaction --no-progress --optimize-autoloader"
       - name: Check for PSR-12 coding style
