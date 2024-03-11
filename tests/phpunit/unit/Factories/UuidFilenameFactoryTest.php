@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace SpazzMarticus\Tus\Factories;
 
 use SplFileInfo;
-use SpazzMarticus\Tus\Factories\UuidFilenameFactory;
 
 class UuidFilenameFactoryTest extends AbstractFilenameFactoryTest
 {

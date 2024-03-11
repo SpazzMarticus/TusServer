@@ -28,6 +28,7 @@ class ExampleMiddleware implements MiddlewareInterface
                 $this->deleteDirectories($this->uploadDirectory);
                 $this->deleteDirectories($this->chunkDirectory);
                 $this->deleteDirectories($this->storageDirectory);
+
                 return $this->responseFactory->createResponse(302)
                     ->withHeader('Location', '/'); //Redirect back to root
             } elseif ($request->getUri()->getPath() === '/' && empty($request->getQueryParams())) {
@@ -42,6 +43,7 @@ class ExampleMiddleware implements MiddlewareInterface
         $this->createDir($this->uploadDirectory);
         $this->createDir($this->chunkDirectory);
         $this->createDir($this->storageDirectory);
+
         /**
          * Pass request to tus server
          */
@@ -56,12 +58,14 @@ class ExampleMiddleware implements MiddlewareInterface
     private function deleteDirectories(string $dir): void
     {
         if (is_dir($dir)) {
-            $it = new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS | \FilesystemIterator::SKIP_DOTS);
+            $it = new RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS);
             $files = new RecursiveIteratorIterator(
                 $it,
                 RecursiveIteratorIterator::CHILD_FIRST
             );
             foreach ($files as $file) {
+                \assert($file instanceof \SplFileObject);
+
                 if ($file->isDir()) {
                     rmdir($file->getRealPath());
                 } else {

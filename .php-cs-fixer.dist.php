@@ -18,6 +18,9 @@ return (new PhpCsFixer\Config())
         '@PER-CS:risky' => true,
         '@PHP80Migration:risky' => true,
         '@PHP82Migration' => true,
+        'blank_line_before_statement' => true,
+        'method_chaining_indentation' => true,
+        'no_unused_imports' => true,
     ])
     ->setRiskyAllowed(true)
     ->setFinder($finder)

@@ -5,11 +5,9 @@ declare(strict_types=1);
 namespace SpazzMarticus\Tus\Providers;
 
 use Ramsey\Uuid\Uuid;
-use Mockery;
 use Psr\Http\Message\ServerRequestInterface;
 use SpazzMarticus\Tus\Exceptions\UnexpectedValueException;
 use Laminas\Diactoros\Uri;
-use Laminas\Diactoros\ServerRequest;
 
 class ParameterLocationProviderTest extends AbstractLocationProviderTest
 {
@@ -17,8 +15,9 @@ class ParameterLocationProviderTest extends AbstractLocationProviderTest
 
     public function setUp(): void
     {
-        $this->provider = new ParameterLocationProvider();
         parent::setUp();
+
+        $this->provider = new ParameterLocationProvider();
     }
 
     public function testProvideLocationWithExistingQueryParams(): void
@@ -45,11 +44,16 @@ class ParameterLocationProviderTest extends AbstractLocationProviderTest
         $this->assertEquals($expectedUri, $this->provider->provideLocation($uuid, $request));
     }
 
+    /**
+     * @param array<mixed> $queryParams
+     */
     protected function mockServerRequestInterface(array $queryParams): ServerRequestInterface
     {
-        $request = Mockery::mock(ServerRequestInterface::class);
-        $request->shouldReceive('getQueryParams')
-            ->andReturn($queryParams);
+        $request = $this->createMock(ServerRequestInterface::class);
+        $request
+            ->method('getQueryParams')
+            ->willReturn($queryParams)
+        ;
 
         return $request;
     }

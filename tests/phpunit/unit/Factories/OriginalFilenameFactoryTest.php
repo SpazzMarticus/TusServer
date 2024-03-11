@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace SpazzMarticus\Tus\Factories;
 
 use SplFileInfo;
-use SpazzMarticus\Tus\Factories\OriginalFilenameFactory;
 
 class OriginalFilenameFactoryTest extends AbstractFilenameFactoryTest
 {
@@ -14,9 +13,12 @@ class OriginalFilenameFactoryTest extends AbstractFilenameFactoryTest
     public function setUp(): void
     {
         parent::setUp();
+
         $this->factory = new OriginalFilenameFactory($this->directory);
     }
     /**
+     * @param array<string, mixed> $metadata
+     *
      * @dataProvider providerGenerateFilename
      */
     public function testGenerateFilename(string $expectedFilename, array $metadata): void
@@ -26,9 +28,13 @@ class OriginalFilenameFactoryTest extends AbstractFilenameFactoryTest
         $this->assertEquals($expectedFilename, $this->factory->generateFilename($this->uuid, $metadata));
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function providerGenerateFilename(): array
     {
         parent::setUp();
+
         return [
 
             /**

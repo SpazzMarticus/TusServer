@@ -29,6 +29,14 @@ use SpazzMarticus\Tus\Services\MetadataService;
 use SplFileInfo;
 
 /**
+ * @phpstan-type StorageArrayShape array{
+ *     complete: boolean,
+ *     length: int,
+ *     defer: boolean,
+ *     metadata: array<string, mixed>,
+ *     file: string,
+ * }
+ *
  * @todo Check for extensions/MIME? (Extension like TargetFileFactory? Can this be checked with first chunk?)
  */
 class TusServer implements RequestHandlerInterface, LoggerAwareInterface
@@ -84,6 +92,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
     {
         $this->useIntermediateChunk = $use;
         $this->chunkDirectory = $chunkDirectory ?? sys_get_temp_dir() . '/';
+
         return $this;
     }
     /**
@@ -92,6 +101,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
     public function setMaxSize(int $maxSize): self
     {
         $this->maxSize = $maxSize;
+
         return $this;
     }
 
@@ -106,6 +116,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
         $this->allowGetCalls = $allow;
         $this->storageTTLAfterUploadComplete = $allow ? $ttl : -1;
         $this->allowGetCallsForPartialUploads = $allow && $allowPartial;
+
         return $this;
     }
 
@@ -124,6 +135,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
         if (!in_array($clientVersion, self::SUPPORTED_VERSIONS) && $method !== 'GET') {
             return $this->createResponse(412); //Precondition Failed
         }
+
         return match ($method) {
             'OPTIONS' => $this->handleOptions($request),
             'HEAD' => $this->handleHead($request),
@@ -150,6 +162,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
             return $this->createResponse(404);
         }
 
+        /** @var StorageArrayShape | null $storage */
         $storage = $this->storage->get($uuid->getHex()->toString());
 
         if (!$storage) {
@@ -160,6 +173,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
 
         if (!$this->fileService->exists($targetFile)) {
             $this->storage->delete($uuid->getHex()->toString());
+
             return $this->createResponse(404);
         }
 
@@ -169,7 +183,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
             ->withHeader('Upload-Offset', (string) $size);
 
         if (!$storage['defer']) {
-            $response = $response->withHeader('Upload-Length', $storage['length']);
+            $response = $response->withHeader('Upload-Length', (string) $storage['length']);
         }
 
         return $response;
@@ -214,6 +228,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
             $this->fileService->create($targetFile);
         } catch (RuntimeException $exception) {
             $this->storage->delete($uuid->getHex()->toString());
+
             throw $exception;
         }
 
@@ -227,9 +242,9 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
 
         if ($this->getHeaderScalar($request, 'Content-Type')  === 'application/offset+octet-stream') {
             return $this->handlePatch($request, $response, $uuid);
-        } else {
-            return $response->withHeader('Upload-Offset', "0");
         }
+
+        $response = $response->withHeader('Upload-Offset', "0");
 
         $this->eventDispatcher->dispatch(new UploadStarted($uuid, $targetFile, $storage['metadata']));
 
@@ -251,7 +266,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
         }
 
         /**
-         * @var array $storage
+         * @var StorageArrayShape | null $storage
          */
         $storage = $this->storage->get($uuid->getHex()->toString());
 
@@ -291,7 +306,10 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
         }
 
         if ($this->useIntermediateChunk) {
-            $chunkFile = new SplFileInfo(tempnam($this->chunkDirectory, $uuid->getHex()->toString()));
+            $tempFile = tempnam($this->chunkDirectory, $uuid->getHex()->toString());
+            \assert(is_string($tempFile));
+
+            $chunkFile = new SplFileInfo($tempFile);
             $chunkHandle = $this->fileService->open($chunkFile);
         }
 
@@ -300,7 +318,6 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
 
         try {
             /**
-             * @psalm-suppress PossiblyUndefinedVariable
              * $this->useIntermediateChunk is not altered while running this method.
              */
             $bytesTransfered = $this->fileService->copyFromStream($this->useIntermediateChunk ? $chunkHandle : $fileHandle, $request->getBody(), ($defer ? $this->maxSize : $storage['length']) - $offset);
@@ -310,12 +327,14 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
              */
             $this->tryDeleteFile($targetFile);
             $this->storage->delete($uuid->getHex()->toString());
+
             return $this->createResponse(409); //Conflict
         }
 
         if ($this->useIntermediateChunk) {
             unset($chunkHandle);
             $exception = null;
+
             try {
                 /**
                  * @todo Test for huge files, test with apache/nginx, php built in is RAM hungry
@@ -332,8 +351,6 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
                 ) {
                     throw new RuntimeException('Error when copying ' . $chunkFile->getPathname() . ' to target file ' . $targetFile->getPathname());
                 }
-            } catch (RuntimeException $t) {
-                $exception = $t;
             } finally {
                 /**
                  * Clean up and rethrow
@@ -341,9 +358,6 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
                 unset($fileHandle);
                 $this->tryDeleteFile($chunkFile);
                 $this->storage->delete($uuid->getHex()->toString());
-                if ($exception) {
-                    throw $exception;
-                }
             }
         }
 
@@ -353,12 +367,14 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
             if ($offset + $bytesTransfered > $this->maxSize) {
                 $this->tryDeleteFile($targetFile);
                 $this->storage->delete($uuid->getHex()->toString());
+
                 return $this->createResponse(409, $response);
             }
         } else {
             if ($offset + $bytesTransfered !== $size) {
                 $this->tryDeleteFile($targetFile);
                 $this->storage->delete($uuid->getHex()->toString());
+
                 return $this->createResponse(409, $response);
             }
         }
@@ -399,6 +415,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
             return $this->createResponse(400);
         }
 
+        /** @var StorageArrayShape | null $storage */
         $storage = $this->storage->get($uuid->getHex()->toString());
 
         if (!$storage) {
@@ -429,8 +446,17 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
             ->withHeader('Content-Disposition', 'attachment; filename="' . $targetFile->getFilename() . '"')
             ->withHeader('Content-Transfer-Encoding', 'binary');
 
-        if (isset($storage['metadata']['type'])) {
-            $response = $response->withHeader('Content-Type', $storage['metadata']['type']);
+        if (isset($metadataType = $storage['metadata']['type'])) {
+            if (
+                is_string($metadataType)
+                || (
+                    is_array($metadataType)
+                    && count($metadataType) === count(array_filter($metadataType, static fn($type): bool => is_string($type)))
+                )
+            ) {
+                /** @var string | string[] $metadataType */
+                $response = $response->withHeader('Content-Type', $metadataType);
+            }
         }
 
         return $response;
@@ -443,6 +469,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
     protected function createResponse(int $code = 200, ResponseInterface $response = null): ResponseInterface
     {
         $response = $response ? $response->withStatus($code) : $this->responseFactory->createResponse($code);
+
         return $response
             ->withHeader('Cache-Control', 'no-store')
             ->withHeader('Tus-Resumable', '1.0.0');
@@ -461,7 +488,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
         try {
             $this->fileService->delete($file);
         } catch (RuntimeException) {
-            $this->logger->notice('Could not delete file ' . $file->getPathname());
+            $this->logger?->notice('Could not delete file ' . $file->getPathname());
         }
     }
 }

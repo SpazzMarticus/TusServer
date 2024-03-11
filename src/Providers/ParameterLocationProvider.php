@@ -10,12 +10,13 @@ use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 use Psr\Http\Message\UriInterface;
 
-class ParameterLocationProvider extends AbstractLocationProvider implements LocationProviderInterface
+class ParameterLocationProvider extends AbstractLocationProvider
 {
     public function provideLocation(UuidInterface $uuid, ServerRequestInterface $request): UriInterface
     {
         $uri = $request->getUri();
         $uuidQuery = http_build_query(['uuid' => $uuid->toString()]);
+
         return $uri->withQuery($uri->getQuery() ? $uri->getQuery() . '&' . $uuidQuery : $uuidQuery);
     }
 
