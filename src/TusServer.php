@@ -214,6 +214,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
             throw new RuntimeException($targetFile->getPath() . ' is not a directory');
         }
 
+        /** @var StorageArrayShape $storage */
         $storage = [
             'complete' => false,
             'length' => $length,
