@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SpazzMarticus\Tus\Services;
 
 use Mockery;
@@ -71,7 +73,7 @@ class FileServiceTest extends \PHPUnit\Framework\TestCase
      */
     public function testCreateFailure(): void
     {
-        $this->fsDir->chmod(0000);
+        $this->fsDir->chmod(0o000);
         $file = $this->getTargetFile();
 
         $this->assertFalse($this->fileService->exists($file));
@@ -106,7 +108,7 @@ class FileServiceTest extends \PHPUnit\Framework\TestCase
          * ... In short: whether you can delete a file/directory doesn't depend on the rights you have for the file/directory you want to delete, but on the rights of the directory the file is in. ...
          * @see https://github.com/bovigo/vfsStream/issues/166#issuecomment-375649341
          */
-        $this->fsDir->chmod(0000);
+        $this->fsDir->chmod(0o000);
         $file = $this->getTargetFile();
 
         $this->assertTrue($this->fileService->exists($file));
@@ -177,55 +179,55 @@ class FileServiceTest extends \PHPUnit\Framework\TestCase
              */
             [
                 '123456789',
-                -123
+                -123,
             ],
             /**
              * and zero will result in reading whole file at once
              */
             [
                 '123456789',
-                0
+                0,
             ],
             [
                 '123456789',
-                1
+                1,
             ],
             [
                 '123456789',
-                3
+                3,
             ],
             [
                 '123456789',
-                2 ^ 10
+                2 ^ 10,
             ],
             [
                 /**
                  * @see http://www.gutenberg.org/cache/epub/61540/pg61540.txt
                  */
                 <<<EOT
-                He drew back mistrustfully. Then he looked around the room, found
-                another gun, unloaded it, and handed it to me. "Go ahead," he said.
+                                    He drew back mistrustfully. Then he looked around the room, found
+                                    another gun, unloaded it, and handed it to me. "Go ahead," he said.
 
-                It was a lousy job. I was in a state and in a hurry and the sweat
-                running down my forehead and dripping off my eyebrows didn't help any.
-                The workshop wasn't too well equipped, either, and I hate working from
-                my head. I like a nice diagram to look at.
+                                    It was a lousy job. I was in a state and in a hurry and the sweat
+                                    running down my forehead and dripping off my eyebrows didn't help any.
+                                    The workshop wasn't too well equipped, either, and I hate working from
+                                    my head. I like a nice diagram to look at.
 
-                But I made it somehow, very crudely, replacing one hand by the chamber
-                and barrel and attaching the trigger so that it would be worked by the
-                same nerve currents as actuated the finger movements to fire a separate
-                gun.
+                                    But I made it somehow, very crudely, replacing one hand by the chamber
+                                    and barrel and attaching the trigger so that it would be worked by the
+                                    same nerve currents as actuated the finger movements to fire a separate
+                                    gun.
 
-                The android loaded himself awkwardly. I stood aside, and Quinby
-                tossed up the disk. You never saw a prettier piece of instantaneous
-                trap-shooting. The android stretched his face into that very rare
-                thing, a robot grin, and expressed himself in pungently jubilant
-                military language.
+                                    The android loaded himself awkwardly. I stood aside, and Quinby
+                                    tossed up the disk. You never saw a prettier piece of instantaneous
+                                    trap-shooting. The android stretched his face into that very rare
+                                    thing, a robot grin, and expressed himself in pungently jubilant
+                                    military language.
 
-                "You like it?" Quinby asked.
-EOT,
-                32
-            ]
+                                    "You like it?" Quinby asked.
+                    EOT,
+                32,
+            ],
         ];
     }
 

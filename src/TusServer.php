@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SpazzMarticus\Tus;
 
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -243,7 +245,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
 
         //Created
         $response = $this->createResponse(201)
-            ->withHeader('Location', (string)$this->locationProvider->provideLocation($uuid, $request));
+            ->withHeader('Location', (string) $this->locationProvider->provideLocation($uuid, $request));
 
         if ($defer) {
             $response = $response->withHeader('Upload-Defer-Length', "1");

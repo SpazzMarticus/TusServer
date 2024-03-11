@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SpazzMarticus\Example;
 
 use Psr\Http\Server\MiddlewareInterface;
@@ -86,7 +88,7 @@ class ExampleMiddleware implements MiddlewareInterface
     private function createDir(string $dir): void
     {
         if (!is_dir($dir)) {
-            if (!@mkdir($dir, 0777, true)) {
+            if (!@mkdir($dir, 0o777, true)) {
                 throw new RuntimeException('Can\'t create directory');
             }
         }

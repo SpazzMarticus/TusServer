@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SpazzMarticus\Tus\Factories;
 
 use SplFileInfo;
@@ -36,7 +38,7 @@ class OriginalFilenameFactoryTest extends AbstractFilenameFactoryTest
                 $this->directory . 'my-filename.txt',
                 [
                     'name' => 'my-filename.txt',
-                    'filename' => 'my-other-filename.txt'
+                    'filename' => 'my-other-filename.txt',
                 ],
             ],
             /**
@@ -45,7 +47,7 @@ class OriginalFilenameFactoryTest extends AbstractFilenameFactoryTest
             [
                 $this->directory . 'my-other-filename.txt',
                 [
-                    'filename' => 'my-other-filename.txt'
+                    'filename' => 'my-other-filename.txt',
                 ],
             ],
             /**
@@ -53,7 +55,7 @@ class OriginalFilenameFactoryTest extends AbstractFilenameFactoryTest
              */
             [
                 $this->directory . $this->uuid->getHex(),
-                []
+                [],
             ],
         ];
     }
@@ -65,7 +67,7 @@ class OriginalFilenameFactoryTest extends AbstractFilenameFactoryTest
         $expectedFilename = new SplFileInfo($this->directory . $this->uuid->getHex());
 
         $this->assertEquals($expectedFilename, $this->factory->generateFilename($this->uuid, [
-            'name' => 'alreadyUploaded.bin'
+            'name' => 'alreadyUploaded.bin',
         ]));
     }
 }

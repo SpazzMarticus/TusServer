@@ -21,6 +21,7 @@
     },
     "require-dev": {
         "cache/filesystem-adapter": "^1.0",
+        "friendsofphp/php-cs-fixer": "^v3.51.0",
         "laminas/laminas-diactoros": "^2.2|^3.0",
         "laminas/laminas-httphandlerrunner": "^1.1|^2.0",
         "mikey179/vfsstream": "^1.6",
@@ -28,8 +29,7 @@
         "monolog/monolog": "^2.0",
         "phpunit/phpunit": "^9.0",
         "psr/http-server-middleware": "^1.0",
-        "squizlabs/php_codesniffer": "^3.6",
-        "symfony/event-dispatcher": "^6.4"
+        "symfony/event-dispatcher": "^6.4|^7.0"
     },
     "autoload": {
         "psr-4": {
@@ -42,8 +42,7 @@
         }
     },
     "scripts": {
-        "ci:phpcbf": "phpcbf --standard=PSR12 src/ example/ tests/",
-        "ci:phpcs": "phpcs --runtime-set ignore_warnings_on_exit true --standard=PSR12 src/ example/ tests/",
+        "ci:phpcs": "php-cs-fixer fix",
         "ci:test:phpunit": "phpunit -c build/phpunit.xml",
         "ci:test:newman": "node node_modules/newman/bin/newman.js run -e tests/postman/tus.postman_environment.json tests/postman/tus.postman_collection.json --bail",
         "ci:tests": [
@@ -54,7 +53,6 @@
             "@ci:tests"
         ],
         "ci:static": [
-            "@ci:phpcbf",
             "@ci:phpcs"
         ],
         "ci": [

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SpazzMarticus\Tus\Services;
 
 use Mockery;
@@ -39,13 +41,13 @@ class MetadataServiceTest extends \PHPUnit\Framework\TestCase
         $request = $this->mockRequest('');
 
         $dataSets[] = [
-            $request, []
+            $request, [],
         ];
 
         $request = $this->mockRequest('');
 
         $dataSets[] = [
-            $request, []
+            $request, [],
         ];
 
         return $dataSets;

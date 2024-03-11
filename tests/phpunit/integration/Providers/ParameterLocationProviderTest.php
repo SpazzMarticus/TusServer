@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SpazzMarticus\Tus\Providers;
 
 use Ramsey\Uuid\Uuid;

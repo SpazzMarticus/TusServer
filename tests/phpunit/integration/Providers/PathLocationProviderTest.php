@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SpazzMarticus\Tus\Providers;
 
 use Ramsey\Uuid\Uuid;
@@ -65,19 +67,19 @@ class PathLocationProviderTest extends AbstractLocationProviderTest
         return [
             [
                 $this->mockServerRequestInterface(''),
-                null
+                null,
             ],
             [
                 $this->mockServerRequestInterface('path/this-is-not-a-valid-uuid'),
-                null
+                null,
             ],
             [
                 $this->mockServerRequestInterface('path/' . $uuidString),
-                $uuid
+                $uuid,
             ],
             [
                 $this->mockServerRequestInterface('this/is/a/longer/path/' . $uuidString),
-                $uuid
+                $uuid,
             ],
         ];
     }
