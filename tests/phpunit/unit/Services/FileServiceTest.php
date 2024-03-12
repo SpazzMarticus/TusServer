@@ -6,6 +6,8 @@ namespace SpazzMarticus\Tus\Services;
 
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Depends;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\StreamInterface;
 use RuntimeException as GlobalRuntimeException;
@@ -33,7 +35,7 @@ class FileServiceTest extends TestCase
 
     public function testInstance(): void
     {
-        $this->assertSame(__FILE__, $this->fileService->instance(__FILE__)->getPathname());
+        self::assertSame(__FILE__, $this->fileService->instance(__FILE__)->getPathname());
     }
 
     protected function getTargetFile(): SplFileInfo
@@ -41,66 +43,56 @@ class FileServiceTest extends TestCase
         return $this->fileService->instance(vfsStream::url('root/files/target.file'));
     }
 
-    /**
-     * @depends testInstance
-     */
+    #[Depends('testInstance')]
     public function testCreateSuccess(): void
     {
         $file = $this->getTargetFile();
 
-        $this->assertFalse($this->fileService->exists($file));
+        self::assertFalse($this->fileService->exists($file));
         $this->fileService->create($file);
-        $this->assertTrue($this->fileService->exists($file));
+        self::assertTrue($this->fileService->exists($file));
     }
 
-    /**
-     * @depends testInstance
-     * @depends testCreateSuccess
-     */
+    #[Depends('testInstance')]
+    #[Depends('testCreateSuccess')]
     public function testCreateNoOverwrite(): void
     {
         $this->fsDir->addChild(vfsStream::newFile('target.file'));
 
         $file = $this->getTargetFile();
 
-        $this->assertTrue($this->fileService->exists($file));
+        self::assertTrue($this->fileService->exists($file));
 
         $this->expectException(RuntimeException::class);
         $this->fileService->create($file);
     }
 
-    /**
-     * @depends testInstance
-     */
+    #[Depends('testInstance')]
     public function testCreateFailure(): void
     {
         $this->fsDir->chmod(0o000);
         $file = $this->getTargetFile();
 
-        $this->assertFalse($this->fileService->exists($file));
+        self::assertFalse($this->fileService->exists($file));
 
         $this->expectException(RuntimeException::class);
         $this->fileService->create($file);
     }
 
-    /**
-     * @depends testInstance
-     * @depends testCreateSuccess
-     */
+    #[Depends('testInstance')]
+    #[Depends('testCreateSuccess')]
     public function testDeleteSuccess(): void
     {
         $this->fsDir->addChild(vfsStream::newFile('target.file')->withContent('1234567'));
         $file = $this->getTargetFile();
 
-        $this->assertTrue($this->fileService->exists($file));
+        self::assertTrue($this->fileService->exists($file));
         $this->fileService->delete($file);
-        $this->assertFalse($this->fileService->exists($file));
+        self::assertFalse($this->fileService->exists($file));
     }
 
-    /**
-     * @depends testInstance
-     * @depends testCreateSuccess
-     */
+    #[Depends('testInstance')]
+    #[Depends('testCreateSuccess')]
     public function testDeleteFailure(): void
     {
         $this->fsDir->addChild(vfsStream::newFile('target.file')->withContent('1234567'));
@@ -113,7 +105,7 @@ class FileServiceTest extends TestCase
 
         $file = $this->getTargetFile();
 
-        $this->assertTrue($this->fileService->exists($file));
+        self::assertTrue($this->fileService->exists($file));
 
         $this->expectException(RuntimeException::class);
         $this->fileService->delete($file);
@@ -163,11 +155,9 @@ class FileServiceTest extends TestCase
         return $chunkSize > 0 ? str_split($string, $chunkSize) : [$string];
     }
 
-    /**
-     * @depends testInstance
-     * @depends testCreateSuccess
-     * @dataProvider providerCopyFromStream
-     */
+    #[Depends('testInstance')]
+    #[Depends('testCreateSuccess')]
+    #[DataProvider('providerCopyFromStream')]
     public function testCopyFromStream(string $content, int $chunkSize): void
     {
         $stream = $this->mockStream($this->chunkString($content, $chunkSize));
@@ -177,78 +167,71 @@ class FileServiceTest extends TestCase
         $this->fileService->setChunkSize($chunkSize);
         $bytesTransferred = $this->fileService->copyFromStream($targetHandle, $stream);
 
-        $this->assertSame(\strlen($content), $bytesTransferred);
-        $this->assertSame($bytesTransferred, $this->fileService->size($targetHandle));
-        $this->assertSame($content, file_get_contents($targetHandle->getPathname()));
+        self::assertSame(\strlen($content), $bytesTransferred);
+        self::assertSame($bytesTransferred, $this->fileService->size($targetHandle));
+        self::assertSame($content, file_get_contents($targetHandle->getPathname()));
     }
 
-    /**
-     * @return array<mixed>
-     */
-    public function providerCopyFromStream(): array
+    public static function providerCopyFromStream(): \Iterator
     {
-        return [
+        /**
+         * Negative numbers...
+         */
+        yield [
+            '123456789',
+            -123,
+        ];
+        /**
+         * and zero will result in reading whole file at once
+         */
+        yield [
+            '123456789',
+            0,
+        ];
+        yield [
+            '123456789',
+            1,
+        ];
+        yield [
+            '123456789',
+            3,
+        ];
+        yield [
+            '123456789',
+            2 ^ 10,
+        ];
+        yield [
             /**
-             * Negative numbers...
+             * @see http://www.gutenberg.org/cache/epub/61540/pg61540.txt
              */
-            [
-                '123456789',
-                -123,
-            ],
-            /**
-             * and zero will result in reading whole file at once
-             */
-            [
-                '123456789',
-                0,
-            ],
-            [
-                '123456789',
-                1,
-            ],
-            [
-                '123456789',
-                3,
-            ],
-            [
-                '123456789',
-                2 ^ 10,
-            ],
-            [
-                /**
-                 * @see http://www.gutenberg.org/cache/epub/61540/pg61540.txt
-                 */
-                <<<EOT
-                                    He drew back mistrustfully. Then he looked around the room, found
-                                    another gun, unloaded it, and handed it to me. "Go ahead," he said.
+            <<<EOT
+                                He drew back mistrustfully. Then he looked around the room, found
+                                another gun, unloaded it, and handed it to me. "Go ahead," he said.
 
-                                    It was a lousy job. I was in a state and in a hurry and the sweat
-                                    running down my forehead and dripping off my eyebrows didn't help any.
-                                    The workshop wasn't too well equipped, either, and I hate working from
-                                    my head. I like a nice diagram to look at.
+                                It was a lousy job. I was in a state and in a hurry and the sweat
+                                running down my forehead and dripping off my eyebrows didn't help any.
+                                The workshop wasn't too well equipped, either, and I hate working from
+                                my head. I like a nice diagram to look at.
 
-                                    But I made it somehow, very crudely, replacing one hand by the chamber
-                                    and barrel and attaching the trigger so that it would be worked by the
-                                    same nerve currents as actuated the finger movements to fire a separate
-                                    gun.
+                                But I made it somehow, very crudely, replacing one hand by the chamber
+                                and barrel and attaching the trigger so that it would be worked by the
+                                same nerve currents as actuated the finger movements to fire a separate
+                                gun.
 
-                                    The android loaded himself awkwardly. I stood aside, and Quinby
-                                    tossed up the disk. You never saw a prettier piece of instantaneous
-                                    trap-shooting. The android stretched his face into that very rare
-                                    thing, a robot grin, and expressed himself in pungently jubilant
-                                    military language.
+                                The android loaded himself awkwardly. I stood aside, and Quinby
+                                tossed up the disk. You never saw a prettier piece of instantaneous
+                                trap-shooting. The android stretched his face into that very rare
+                                thing, a robot grin, and expressed himself in pungently jubilant
+                                military language.
 
-                                    "You like it?" Quinby asked.
-                    EOT,
-                32,
-            ],
+                                "You like it?" Quinby asked.
+                EOT,
+            32,
         ];
     }
 
-    /**
-     * @depends testInstance
-     * @depends testCopyFromStream
-     */
+    #[Depends('testInstance')]
+    #[Depends('testCopyFromStream')]
     public function testCopyFromStreamSizeLimit(): void
     {
         $content = '01020304050607080910';
@@ -265,10 +248,8 @@ class FileServiceTest extends TestCase
         $this->fileService->copyFromStream($targetHandle, $stream, $sizeLimit);
     }
 
-    /**
-     * @depends testInstance
-     * @depends testCopyFromStream
-     */
+    #[Depends('testInstance')]
+    #[Depends('testCopyFromStream')]
     public function testCopyFromStreamChunkSize(): void
     {
         $content = '01020304050607080910';
@@ -281,25 +262,23 @@ class FileServiceTest extends TestCase
         $this->fileService->setChunkSize($chunkSize);
         $bytesTransferred = $this->fileService->copyFromStream($targetHandle, $stream);
 
-        $this->assertSame(\strlen($content), $bytesTransferred);
-        $this->assertSame($bytesTransferred, $this->fileService->size($targetHandle));
-        $this->assertSame($content, file_get_contents($targetHandle->getPathname()));
+        self::assertSame(\strlen($content), $bytesTransferred);
+        self::assertSame($bytesTransferred, $this->fileService->size($targetHandle));
+        self::assertSame($content, file_get_contents($targetHandle->getPathname()));
     }
 
-    /**
-     * @depends testInstance
-     * @depends testCopyFromStream
-     */
+    #[Depends('testInstance')]
+    #[Depends('testCopyFromStream')]
     public function testCopyFromStreamThrowingException(): void
     {
         $stream = $this->createMock(StreamInterface::class);
         $stream
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('eof')
             ->willReturn(false)
         ;
         $stream
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('read')
             ->willThrowException(new GlobalRuntimeException("Test-Exception"))
         ;
@@ -310,11 +289,9 @@ class FileServiceTest extends TestCase
         $this->fileService->copyFromStream($targetHandle, $stream);
     }
 
-    /**
-     * @depends testInstance
-     * @depends testCreateSuccess
-     * @depends testCopyFromStream
-     */
+    #[Depends('testInstance')]
+    #[Depends('testCreateSuccess')]
+    #[Depends('testCopyFromStream')]
     public function testCopyFromStreamWritingThrowsException(): void
     {
         $stream = $this->mockStream(['1234','5678']);
@@ -329,7 +306,7 @@ class FileServiceTest extends TestCase
             ->getMock()
         ;
         $targetHandle
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('fwrite')
             ->willReturn(0)
         ;
@@ -338,11 +315,9 @@ class FileServiceTest extends TestCase
         $this->fileService->copyFromStream($targetHandle, $stream);
     }
 
-    /**
-     * @depends testInstance
-     * @depends testCreateSuccess
-     * @depends testCopyFromStream
-     */
+    #[Depends('testInstance')]
+    #[Depends('testCreateSuccess')]
+    #[Depends('testCopyFromStream')]
     public function testCopyFromStreamFlushingThrowsException(): void
     {
         $stream = $this->mockStream(['1234','5678']);
@@ -357,12 +332,12 @@ class FileServiceTest extends TestCase
             ->getMock()
         ;
         $targetHandle
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('fwrite')
             ->willReturn(4)
         ;
         $targetHandle
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('fflush')
             ->willReturn(false)
         ;
@@ -372,10 +347,8 @@ class FileServiceTest extends TestCase
     }
 
 
-    /**
-     * @depends testInstance
-     * @depends testCreateSuccess
-     */
+    #[Depends('testInstance')]
+    #[Depends('testCreateSuccess')]
     public function testPointSuccess(): void
     {
         $targetHandle = $this->getTargetHandle();
@@ -384,14 +357,12 @@ class FileServiceTest extends TestCase
         $this->fileService->point($targetHandle, 10);
         $targetHandle->fwrite('4711');
 
-        $this->assertSame('0000-0000-4711-0000-0000', file_get_contents($targetHandle->getPathname()));
+        self::assertSame('0000-0000-4711-0000-0000', file_get_contents($targetHandle->getPathname()));
     }
 
-    /**
-     * @depends testInstance
-     * @depends testCreateSuccess
-     * @depends testCopyFromStream
-     */
+    #[Depends('testInstance')]
+    #[Depends('testCreateSuccess')]
+    #[Depends('testCopyFromStream')]
     public function testPointFailure(): void
     {
         $targetHandle = $this->getTargetHandle();

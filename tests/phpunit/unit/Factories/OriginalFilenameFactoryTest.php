@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace SpazzMarticus\Tus\Factories;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+use Ramsey\Uuid\Uuid;
 use SplFileInfo;
 
-class OriginalFilenameFactoryTest extends AbstractFilenameFactoryTest
+class OriginalFilenameFactoryTest extends AbstractFilenameFactoryTestCase
 {
     protected OriginalFilenameFactory $factory;
 
@@ -19,51 +21,42 @@ class OriginalFilenameFactoryTest extends AbstractFilenameFactoryTest
 
     /**
      * @param array<string, mixed> $metadata
-     *
-     * @dataProvider providerGenerateFilename
      */
+    #[DataProvider('providerGenerateFilename')]
     public function testGenerateFilename(string $expectedFilename, array $metadata): void
     {
-        $expectedFilename = new SplFileInfo($expectedFilename);
+        $expectedFilename = new SplFileInfo(sprintf('%s/%s', $this->directory, $expectedFilename));
 
-        $this->assertEquals($expectedFilename, $this->factory->generateFilename($this->uuid, $metadata));
+        self::assertEquals($expectedFilename, $this->factory->generateFilename($this->uuid, $metadata));
     }
 
-    /**
-     * @return array<mixed>
-     */
-    public function providerGenerateFilename(): array
+    public static function providerGenerateFilename(): \Iterator
     {
-        parent::setUp();
-
-        return [
-
-            /**
-             * Prefer Name from $metadata['name']
-             */
+        /**
+         * Prefer Name from $metadata['name']
+         */
+        yield [
+            'my-filename.txt',
             [
-                $this->directory . 'my-filename.txt',
-                [
-                    'name' => 'my-filename.txt',
-                    'filename' => 'my-other-filename.txt',
-                ],
+                'name' => 'my-filename.txt',
+                'filename' => 'my-other-filename.txt',
             ],
-            /**
-             * Use $metadata['filename'] if $metadata['name'] not available
-             */
+        ];
+        /**
+         * Use $metadata['filename'] if $metadata['name'] not available
+         */
+        yield [
+            'my-other-filename.txt',
             [
-                $this->directory . 'my-other-filename.txt',
-                [
-                    'filename' => 'my-other-filename.txt',
-                ],
+                'filename' => 'my-other-filename.txt',
             ],
-            /**
-             * Fallback to UUID if no metadata present
-             */
-            [
-                $this->directory . $this->uuid->getHex(),
-                [],
-            ],
+        ];
+        /**
+         * Fallback to UUID if no metadata present
+         */
+        yield [
+            (string) Uuid::fromString('d9af80ad-44a1-445b-86dc-88b42a880d35')->getHex(),
+            [],
         ];
     }
 
@@ -73,7 +66,7 @@ class OriginalFilenameFactoryTest extends AbstractFilenameFactoryTest
 
         $expectedFilename = new SplFileInfo($this->directory . $this->uuid->getHex());
 
-        $this->assertEquals($expectedFilename, $this->factory->generateFilename($this->uuid, [
+        self::assertEquals($expectedFilename, $this->factory->generateFilename($this->uuid, [
             'name' => 'alreadyUploaded.bin',
         ]));
     }

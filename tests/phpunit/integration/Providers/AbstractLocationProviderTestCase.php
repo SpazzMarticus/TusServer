@@ -9,7 +9,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
 
-abstract class AbstractLocationProviderTest extends TestCase
+abstract class AbstractLocationProviderTestCase extends TestCase
 {
     protected function getRequest(UriInterface $uri): ServerRequestInterface
     {

@@ -9,7 +9,7 @@ use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 
-abstract class AbstractFilenameFactoryTest extends TestCase
+abstract class AbstractFilenameFactoryTestCase extends TestCase
 {
     protected string $directory;
 
