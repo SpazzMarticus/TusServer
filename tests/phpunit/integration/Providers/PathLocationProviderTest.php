@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace SpazzMarticus\Tus\Providers;
 
-use Ramsey\Uuid\Uuid;
+use Laminas\Diactoros\Uri;
 use Psr\Http\Message\ServerRequestInterface;
+use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 use SpazzMarticus\Tus\Exceptions\UnexpectedValueException;
-use Laminas\Diactoros\Uri;
 
 class PathLocationProviderTest extends AbstractLocationProviderTest
 {
     protected PathLocationProvider $provider;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -54,7 +54,7 @@ class PathLocationProviderTest extends AbstractLocationProviderTest
         /**
          * Test for UUID or UnexpectedValueException
          */
-        if ($uuid) {
+        if ($uuid instanceof UuidInterface) {
             $this->assertEquals($uuid, $this->provider->provideUuid($request));
         } else {
             $this->expectException(UnexpectedValueException::class);

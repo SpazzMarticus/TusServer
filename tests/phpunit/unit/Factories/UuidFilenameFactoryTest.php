@@ -10,7 +10,7 @@ class UuidFilenameFactoryTest extends AbstractFilenameFactoryTest
 {
     protected UuidFilenameFactory $factory;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         $this->factory = new UuidFilenameFactory($this->directory);

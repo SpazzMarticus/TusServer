@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace SpazzMarticus\Example;
 
-use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
+use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -30,13 +30,17 @@ class ExampleMiddleware implements MiddlewareInterface
                 $this->deleteDirectories($this->storageDirectory);
 
                 return $this->responseFactory->createResponse(302)
-                    ->withHeader('Location', '/'); //Redirect back to root
-            } elseif ($request->getUri()->getPath() === '/' && empty($request->getQueryParams())) {
+                    ->withHeader('Location', '/') //Redirect back to root
+                ;
+            }
+
+            if ($request->getUri()->getPath() === '/' && $request->getQueryParams() === []) {
                 /**
                  * Serve uploader
                  */
                 return $this->responseFactory->createResponse()
-                    ->withBody($this->streamFactory->createStreamFromFile(__DIR__ . '/uploader.html'));
+                    ->withBody($this->streamFactory->createStreamFromFile(__DIR__ . '/uploader.html'))
+                ;
             }
         }
 
@@ -72,16 +76,21 @@ class ExampleMiddleware implements MiddlewareInterface
                     unlink($file->getRealPath());
                 }
             }
+
             rmdir($dir);
         }
     }
 
     private function createDir(string $dir): void
     {
-        if (!is_dir($dir)) {
-            if (!@mkdir($dir, 0o777, true)) {
-                throw new RuntimeException('Can\'t create directory');
-            }
+        if (is_dir($dir)) {
+            return;
         }
+
+        if (@mkdir($dir, 0o777, true)) {
+            return;
+        }
+
+        throw new RuntimeException("Can't create directory");
     }
 }

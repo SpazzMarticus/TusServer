@@ -11,7 +11,7 @@ class MetadataServiceTest extends TestCase
 {
     protected MetadataService $metadataService;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         $this->metadataService = new MetadataService();
     }

@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace SpazzMarticus\Tus\Providers;
 
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\UriInterface;
 use Ramsey\Uuid\Exception\InvalidUuidStringException;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
-use Psr\Http\Message\UriInterface;
 
 class PathLocationProvider extends AbstractLocationProvider
 {

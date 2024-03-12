@@ -4,20 +4,22 @@ declare(strict_types=1);
 
 namespace SpazzMarticus\Tus\Services;
 
+use org\bovigo\vfs\vfsStream;
+use org\bovigo\vfs\vfsStreamDirectory;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\StreamInterface;
+use RuntimeException as GlobalRuntimeException;
 use SpazzMarticus\Tus\Exceptions\ConflictException;
 use SpazzMarticus\Tus\Exceptions\RuntimeException;
 use SplFileInfo;
 use SplFileObject;
-use org\bovigo\vfs\vfsStream;
-use org\bovigo\vfs\vfsStreamDirectory;
-use RuntimeException as GlobalRuntimeException;
 
 class FileServiceTest extends TestCase
 {
     protected FileService $fileService;
+
     protected vfsStreamDirectory $fsRoot;
+
     protected vfsStreamDirectory $fsDir;
 
     protected function setUp(): void
@@ -108,6 +110,7 @@ class FileServiceTest extends TestCase
          * @see https://github.com/bovigo/vfsStream/issues/166#issuecomment-375649341
          */
         $this->fsDir->chmod(0o000);
+
         $file = $this->getTargetFile();
 
         $this->assertTrue($this->fileService->exists($file));
@@ -123,7 +126,7 @@ class FileServiceTest extends TestCase
     {
         $stream = $this->createMock(StreamInterface::class);
 
-        $count = count($chunks);
+        $count = \count($chunks);
         $eof = array_fill(0, $count, false);
         $eof[] = true;
 
@@ -174,7 +177,7 @@ class FileServiceTest extends TestCase
         $this->fileService->setChunkSize($chunkSize);
         $bytesTransferred = $this->fileService->copyFromStream($targetHandle, $stream);
 
-        $this->assertSame(strlen($content), $bytesTransferred);
+        $this->assertSame(\strlen($content), $bytesTransferred);
         $this->assertSame($bytesTransferred, $this->fileService->size($targetHandle));
         $this->assertSame($content, file_get_contents($targetHandle->getPathname()));
     }
@@ -271,17 +274,18 @@ class FileServiceTest extends TestCase
         $content = '01020304050607080910';
         $chunkSize = 0;
 
-        $stream = $this->mockStream($this->chunkString($content, $chunkSize + 1));
+        $stream = $this->mockStream($this->chunkString($content, 1));
 
         $targetHandle = $this->getTargetHandle();
 
         $this->fileService->setChunkSize($chunkSize);
         $bytesTransferred = $this->fileService->copyFromStream($targetHandle, $stream);
 
-        $this->assertSame(strlen($content), $bytesTransferred);
+        $this->assertSame(\strlen($content), $bytesTransferred);
         $this->assertSame($bytesTransferred, $this->fileService->size($targetHandle));
         $this->assertSame($content, file_get_contents($targetHandle->getPathname()));
     }
+
     /**
      * @depends testInstance
      * @depends testCopyFromStream
@@ -305,6 +309,7 @@ class FileServiceTest extends TestCase
         $this->expectException(RuntimeException::class);
         $this->fileService->copyFromStream($targetHandle, $stream);
     }
+
     /**
      * @depends testInstance
      * @depends testCreateSuccess
@@ -375,6 +380,7 @@ class FileServiceTest extends TestCase
     {
         $targetHandle = $this->getTargetHandle();
         $targetHandle->fwrite('0000-0000-0000-0000-0000');
+
         $this->fileService->point($targetHandle, 10);
         $targetHandle->fwrite('4711');
 

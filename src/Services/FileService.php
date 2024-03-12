@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace SpazzMarticus\Tus\Services;
 
-use SpazzMarticus\Tus\Exceptions\RuntimeException;
-use SpazzMarticus\Tus\Exceptions\ConflictException;
-use SplFileInfo;
-use SplFileObject;
 use Psr\Http\Message\StreamInterface;
 use RuntimeException as BaseRuntimeException;
+use SpazzMarticus\Tus\Exceptions\ConflictException;
+use SpazzMarticus\Tus\Exceptions\RuntimeException;
+use SplFileInfo;
+use SplFileObject;
 
 final class FileService
 {
@@ -17,7 +17,7 @@ final class FileService
      * Size of chunks to transfer from stream
      * @todo Give reasons for why this is important and test some more settings (with huge files)
      */
-    protected int $chunkSize = 1_048_576;
+    private int $chunkSize = 1_048_576;
 
     public function setChunkSize(int $chunkSize): void
     {
@@ -67,14 +67,17 @@ final class FileService
 
     public function delete(SplFileInfo $file): void
     {
-        if ($this->exists($file) && !unlink($file->getPathname())) {
-            throw new RuntimeException("Could not delete file");
+        if (!$this->exists($file)) {
+            return;
         }
+
+        if (unlink($file->getPathname())) {
+            return;
+        }
+
+        throw new RuntimeException("Could not delete file");
     }
 
-    /**
-     * @return SplFileObject
-     */
     public function open(SplFileInfo $file): SplFileObject
     {
         return new SplFileObject($file->getPathname(), 'rb+');
@@ -86,6 +89,7 @@ final class FileService
             throw new RuntimeException('Can not set pointer in file');
         }
     }
+
     /**
      * @throws RuntimeException
      * @throws ConflictException if size limit is exceeded
@@ -118,6 +122,7 @@ final class FileService
             if ($bytes === 0) {
                 throw new RuntimeException("Error when writing file");
             }
+
             if ($handle->fflush() === false) {
                 throw new RuntimeException("Error when flushing file");
             }

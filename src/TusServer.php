@@ -20,8 +20,8 @@ use Ramsey\Uuid\UuidInterface;
 use SpazzMarticus\Tus\Events\UploadComplete;
 use SpazzMarticus\Tus\Events\UploadStarted;
 use SpazzMarticus\Tus\Exceptions\ConflictException;
-use SpazzMarticus\Tus\Exceptions\UnexpectedValueException;
 use SpazzMarticus\Tus\Exceptions\RuntimeException;
+use SpazzMarticus\Tus\Exceptions\UnexpectedValueException;
 use SpazzMarticus\Tus\Factories\FilenameFactoryInterface;
 use SpazzMarticus\Tus\Providers\LocationProviderInterface;
 use SpazzMarticus\Tus\Services\FileService;
@@ -39,15 +39,17 @@ use SplFileInfo;
  *
  * @todo Check for extensions/MIME? (Extension like TargetFileFactory? Can this be checked with first chunk?)
  */
-class TusServer implements RequestHandlerInterface, LoggerAwareInterface
+class TusServer implements LoggerAwareInterface, RequestHandlerInterface
 {
     use LoggerAwareTrait;
 
     protected const SUPPORTED_VERSIONS = ['1.0.0'];
+
     /**
      * Package-Dependencies
      */
     protected FileService $fileService;
+
     protected MetadataService $metadataService;
 
     /**
@@ -59,13 +61,16 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
      * Settings for GET-calls
      */
     protected bool $allowGetCalls = false;
+
     protected ?int $storageTTLAfterUploadComplete = -1;
+
     protected bool $allowGetCallsForPartialUploads = false;
 
     /**
      * Settings for using intermediate chunks
      */
     protected bool $useIntermediateChunk = false;
+
     protected string $chunkDirectory = '';
 
     public function __construct(
@@ -95,6 +100,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
 
         return $this;
     }
+
     /**
      * Limits the max size of the upload
      */
@@ -132,7 +138,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
         /**
          * Check for supported versions. Get calls - since not part of protocol - do usually not include a client version
          */
-        if (!in_array($clientVersion, self::SUPPORTED_VERSIONS) && $method !== 'GET') {
+        if (!\in_array($clientVersion, self::SUPPORTED_VERSIONS) && $method !== 'GET') {
             return $this->createResponse(412); //Precondition Failed
         }
 
@@ -151,7 +157,8 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
         return $this->createResponse(200)
             ->withHeader('Tus-Version', '1.0.0')
             ->withHeader('Tus-Max-Size', (string) $this->maxSize)
-            ->withHeader('Tus-Extension', 'creation, creation-defer-length, creation-with-upload');
+            ->withHeader('Tus-Extension', 'creation, creation-defer-length, creation-with-upload')
+        ;
     }
 
     protected function handleHead(ServerRequestInterface $request): ResponseInterface
@@ -180,10 +187,11 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
         $size = $this->fileService->size($targetFile);
 
         $response = $this->createResponse(200)
-            ->withHeader('Upload-Offset', (string) $size);
+            ->withHeader('Upload-Offset', (string) $size)
+        ;
 
         if (!$storage['defer']) {
-            $response = $response->withHeader('Upload-Length', (string) $storage['length']);
+            return $response->withHeader('Upload-Length', (string) $storage['length']);
         }
 
         return $response;
@@ -191,10 +199,10 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
 
     protected function handlePost(ServerRequestInterface $request): ResponseInterface
     {
-        $length = (int) $this->getHeaderScalar($request, 'Upload-Length') ?: 0;
+        $length = (int) $this->getHeaderScalar($request, 'Upload-Length');
         $defer = false;
 
-        if (!$length) {
+        if ($length === 0) {
             $defer = $this->getHeaderScalar($request, 'Upload-Defer-Length') === "1";
 
             if (!$defer) {
@@ -227,15 +235,16 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
 
         try {
             $this->fileService->create($targetFile);
-        } catch (RuntimeException $exception) {
+        } catch (RuntimeException $runtimeException) {
             $this->storage->delete($uuid->getHex()->toString());
 
-            throw $exception;
+            throw $runtimeException;
         }
 
         //Created
         $response = $this->createResponse(201)
-            ->withHeader('Location', (string) $this->locationProvider->provideLocation($uuid, $request));
+            ->withHeader('Location', (string) $this->locationProvider->provideLocation($uuid, $request))
+        ;
 
         if ($defer) {
             $response = $response->withHeader('Upload-Defer-Length', "1");
@@ -258,7 +267,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
             return $this->createResponse(415);
         }
 
-        if (!$uuid) {
+        if (!$uuid instanceof UuidInterface) {
             try {
                 $uuid = $this->locationProvider->provideUuid($request);
             } catch (UnexpectedValueException) {
@@ -278,11 +287,12 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
         $defer = $storage['defer'];
 
         if ($defer) {
-            $length = (int) $this->getHeaderScalar($request, 'Upload-Length') ?: 0;
-            if ($length) {
+            $length = (int) $this->getHeaderScalar($request, 'Upload-Length');
+            if ($length !== 0) {
                 if ($length > $this->maxSize) {
                     return $this->createResponse(413); //Request Entity Too Large
                 }
+
                 $storage['length'] = $length;
                 $storage['defer'] = $defer =  false;
                 $this->storage->set($uuid->getHex()->toString(), $storage);
@@ -295,7 +305,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
             return $this->createResponse(404);
         }
 
-        $offset = (int) $this->getHeaderScalar($request, 'Upload-Offset') ?: 0;
+        $offset = (int) $this->getHeaderScalar($request, 'Upload-Offset');
 
         $size = $this->fileService->size($targetFile);
 
@@ -308,7 +318,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
 
         if ($this->useIntermediateChunk) {
             $tempFile = tempnam($this->chunkDirectory, $uuid->getHex()->toString());
-            \assert(is_string($tempFile));
+            \assert(\is_string($tempFile));
 
             $chunkFile = new SplFileInfo($tempFile);
             $chunkHandle = $this->fileService->open($chunkFile);
@@ -371,17 +381,16 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
 
                 return $this->createResponse(409, $response);
             }
-        } else {
-            if ($offset + $bytesTransfered !== $size) {
-                $this->tryDeleteFile($targetFile);
-                $this->storage->delete($uuid->getHex()->toString());
+        } elseif ($offset + $bytesTransfered !== $size) {
+            $this->tryDeleteFile($targetFile);
+            $this->storage->delete($uuid->getHex()->toString());
 
-                return $this->createResponse(409, $response);
-            }
+            return $this->createResponse(409, $response);
         }
 
         $response = $this->createResponse(204, $response) //No Content
-            ->withHeader('Upload-Offset', (string) $size);
+            ->withHeader('Upload-Offset', (string) $size)
+        ;
 
         if ($defer) {
             $response = $response->withHeader('Upload-Defer-Length', "1");
@@ -437,7 +446,8 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
         }
 
         $response =  $this->createResponse(200)
-            ->withBody($this->streamFactory->createStreamFromFile($targetFile->getPathname()));
+            ->withBody($this->streamFactory->createStreamFromFile($targetFile->getPathname()))
+        ;
 
         /**
          * Filename currently not escaped
@@ -445,15 +455,16 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
          */
         $response = $response->withHeader('Content-Length', (string) $this->fileService->size($targetFile))
             ->withHeader('Content-Disposition', 'attachment; filename="' . $targetFile->getFilename() . '"')
-            ->withHeader('Content-Transfer-Encoding', 'binary');
+            ->withHeader('Content-Transfer-Encoding', 'binary')
+        ;
 
         if (isset($storage['metadata']['type'])) {
             $metadataType = $storage['metadata']['type'];
             if (
-                is_string($metadataType)
+                \is_string($metadataType)
                 || (
-                    is_array($metadataType)
-                    && count($metadataType) === count(array_filter($metadataType, static fn($type): bool => is_string($type)))
+                    \is_array($metadataType)
+                    && \count($metadataType) === \count(array_filter($metadataType, static fn($type): bool => \is_string($type)))
                 )
             ) {
                 /** @var string | string[] $metadataType */
@@ -470,11 +481,12 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
      */
     protected function createResponse(int $code = 200, ResponseInterface $response = null): ResponseInterface
     {
-        $response = $response ? $response->withStatus($code) : $this->responseFactory->createResponse($code);
+        $response = $response instanceof ResponseInterface ? $response->withStatus($code) : $this->responseFactory->createResponse($code);
 
         return $response
             ->withHeader('Cache-Control', 'no-store')
-            ->withHeader('Tus-Resumable', '1.0.0');
+            ->withHeader('Tus-Resumable', '1.0.0')
+        ;
     }
 
     /**
@@ -482,7 +494,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
      */
     protected function getHeaderScalar(RequestInterface $request, string $key): ?string
     {
-        return $request->getHeaderLine($key) ?: null;
+        return $request->getHeaderLine($key) !== '' && $request->getHeaderLine($key) !== '0' ? $request->getHeaderLine($key) : null;
     }
 
     protected function tryDeleteFile(SplFileInfo $file): void

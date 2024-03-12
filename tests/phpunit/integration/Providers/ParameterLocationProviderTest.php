@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace SpazzMarticus\Tus\Providers;
 
-use Ramsey\Uuid\Uuid;
-use Psr\Http\Message\ServerRequestInterface;
-use SpazzMarticus\Tus\Exceptions\UnexpectedValueException;
 use Laminas\Diactoros\Uri;
+use Psr\Http\Message\ServerRequestInterface;
+use Ramsey\Uuid\Uuid;
+use SpazzMarticus\Tus\Exceptions\UnexpectedValueException;
 
 class ParameterLocationProviderTest extends AbstractLocationProviderTest
 {
     protected ParameterLocationProvider $provider;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

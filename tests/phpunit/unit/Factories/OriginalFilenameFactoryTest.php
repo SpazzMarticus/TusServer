@@ -10,12 +10,13 @@ class OriginalFilenameFactoryTest extends AbstractFilenameFactoryTest
 {
     protected OriginalFilenameFactory $factory;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
         $this->factory = new OriginalFilenameFactory($this->directory);
     }
+
     /**
      * @param array<string, mixed> $metadata
      *
