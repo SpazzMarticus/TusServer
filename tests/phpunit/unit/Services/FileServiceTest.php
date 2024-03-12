@@ -16,13 +16,13 @@ use SpazzMarticus\Tus\Exceptions\RuntimeException;
 use SplFileInfo;
 use SplFileObject;
 
-class FileServiceTest extends TestCase
+final class FileServiceTest extends TestCase
 {
-    protected FileService $fileService;
+    private FileService $fileService;
 
-    protected vfsStreamDirectory $fsRoot;
+    private vfsStreamDirectory $fsRoot;
 
-    protected vfsStreamDirectory $fsDir;
+    private vfsStreamDirectory $fsDir;
 
     protected function setUp(): void
     {
@@ -38,7 +38,7 @@ class FileServiceTest extends TestCase
         self::assertSame(__FILE__, $this->fileService->instance(__FILE__)->getPathname());
     }
 
-    protected function getTargetFile(): SplFileInfo
+    private function getTargetFile(): SplFileInfo
     {
         return $this->fileService->instance(vfsStream::url('root/files/target.file'));
     }
@@ -114,7 +114,7 @@ class FileServiceTest extends TestCase
     /**
      * @param string[] $chunks
      */
-    protected function mockStream(array $chunks): StreamInterface
+    private function mockStream(array $chunks): StreamInterface
     {
         $stream = $this->createMock(StreamInterface::class);
 
@@ -135,7 +135,7 @@ class FileServiceTest extends TestCase
         return $stream;
     }
 
-    protected function getTargetHandle(): SplFileObject
+    private function getTargetHandle(): SplFileObject
     {
         $targetFile = $this->getTargetFile();
 
@@ -147,7 +147,7 @@ class FileServiceTest extends TestCase
     /**
      * @return string[]
      */
-    protected function chunkString(string $string, int $chunkSize): array
+    private function chunkString(string $string, int $chunkSize): array
     {
         /**
          * Chunk if chunk size > 0

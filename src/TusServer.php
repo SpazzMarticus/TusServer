@@ -39,7 +39,7 @@ use SplFileInfo;
  *
  * @todo Check for extensions/MIME? (Extension like TargetFileFactory? Can this be checked with first chunk?)
  */
-class TusServer implements LoggerAwareInterface, RequestHandlerInterface
+final class TusServer implements LoggerAwareInterface, RequestHandlerInterface
 {
     use LoggerAwareTrait;
 
@@ -48,30 +48,30 @@ class TusServer implements LoggerAwareInterface, RequestHandlerInterface
     /**
      * Package-Dependencies
      */
-    protected FileService $fileService;
+    private FileService $fileService;
 
-    protected MetadataService $metadataService;
+    private MetadataService $metadataService;
 
     /**
      * Size Settings
      */
-    protected int $maxSize = 1_073_741_824;
+    private int $maxSize = 1_073_741_824;
 
     /**
      * Settings for GET-calls
      */
-    protected bool $allowGetCalls = false;
+    private bool $allowGetCalls = false;
 
-    protected ?int $storageTTLAfterUploadComplete = -1;
+    private ?int $storageTTLAfterUploadComplete = -1;
 
-    protected bool $allowGetCallsForPartialUploads = false;
+    private bool $allowGetCallsForPartialUploads = false;
 
     /**
      * Settings for using intermediate chunks
      */
-    protected bool $useIntermediateChunk = false;
+    private bool $useIntermediateChunk = false;
 
-    protected string $chunkDirectory = '';
+    private string $chunkDirectory = '';
 
     public function __construct(
         /**
@@ -143,16 +143,16 @@ class TusServer implements LoggerAwareInterface, RequestHandlerInterface
         }
 
         return match ($method) {
-            'OPTIONS' => $this->handleOptions($request),
+            'OPTIONS' => $this->handleOptions(),
             'HEAD' => $this->handleHead($request),
             'POST' => $this->handlePost($request),
             'PATCH' => $this->handlePatch($request),
             'GET' => $this->handleGet($request),
-            default => $this->createResponse(400),
-        }; //Bad Request
+            default => $this->createResponse(400), //Bad Request
+        };
     }
 
-    protected function handleOptions(ServerRequestInterface $request): ResponseInterface
+    private function handleOptions(): ResponseInterface
     {
         return $this->createResponse(200)
             ->withHeader('Tus-Version', '1.0.0')
@@ -161,7 +161,7 @@ class TusServer implements LoggerAwareInterface, RequestHandlerInterface
         ;
     }
 
-    protected function handleHead(ServerRequestInterface $request): ResponseInterface
+    private function handleHead(ServerRequestInterface $request): ResponseInterface
     {
         try {
             $uuid = $this->locationProvider->provideUuid($request);
@@ -197,7 +197,7 @@ class TusServer implements LoggerAwareInterface, RequestHandlerInterface
         return $response;
     }
 
-    protected function handlePost(ServerRequestInterface $request): ResponseInterface
+    private function handlePost(ServerRequestInterface $request): ResponseInterface
     {
         $length = (int) $this->getHeaderScalar($request, 'Upload-Length');
         $defer = false;
@@ -261,7 +261,7 @@ class TusServer implements LoggerAwareInterface, RequestHandlerInterface
         return $response;
     }
 
-    protected function handlePatch(ServerRequestInterface $request, ResponseInterface $response = null, UuidInterface $uuid = null): ResponseInterface
+    private function handlePatch(ServerRequestInterface $request, ResponseInterface $response = null, UuidInterface $uuid = null): ResponseInterface
     {
         if ($this->getHeaderScalar($request, 'Content-Type')  !== 'application/offset+octet-stream') {
             return $this->createResponse(415);
@@ -413,7 +413,7 @@ class TusServer implements LoggerAwareInterface, RequestHandlerInterface
      * Serves a file, if server settings allow it
      * (not part of tus.io-Protocol)
      */
-    protected function handleGet(ServerRequestInterface $request): ResponseInterface
+    private function handleGet(ServerRequestInterface $request): ResponseInterface
     {
         if (!$this->allowGetCalls) {
             return $this->createResponse(405);
@@ -479,7 +479,7 @@ class TusServer implements LoggerAwareInterface, RequestHandlerInterface
     /**
      * Create a basic Response
      */
-    protected function createResponse(int $code = 200, ResponseInterface $response = null): ResponseInterface
+    private function createResponse(int $code = 200, ResponseInterface $response = null): ResponseInterface
     {
         $response = $response instanceof ResponseInterface ? $response->withStatus($code) : $this->responseFactory->createResponse($code);
 
@@ -492,12 +492,12 @@ class TusServer implements LoggerAwareInterface, RequestHandlerInterface
     /**
      * Get scalar header-value from request
      */
-    protected function getHeaderScalar(RequestInterface $request, string $key): ?string
+    private function getHeaderScalar(RequestInterface $request, string $key): ?string
     {
         return $request->getHeaderLine($key) !== '' ? $request->getHeaderLine($key) : null;
     }
 
-    protected function tryDeleteFile(SplFileInfo $file): void
+    private function tryDeleteFile(SplFileInfo $file): void
     {
         try {
             $this->fileService->delete($file);

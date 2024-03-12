@@ -9,9 +9,9 @@ use Psr\Http\Message\ServerRequestInterface;
 use Ramsey\Uuid\Uuid;
 use SpazzMarticus\Tus\Exceptions\UnexpectedValueException;
 
-class ParameterLocationProviderTest extends AbstractLocationProviderTestCase
+final class ParameterLocationProviderTest extends AbstractLocationProviderTestCase
 {
-    protected ParameterLocationProvider $provider;
+    private ParameterLocationProvider $provider;
 
     protected function setUp(): void
     {
@@ -47,7 +47,7 @@ class ParameterLocationProviderTest extends AbstractLocationProviderTestCase
     /**
      * @param array<mixed> $queryParams
      */
-    protected function mockServerRequestInterface(array $queryParams): ServerRequestInterface
+    private function mockServerRequestInterface(array $queryParams): ServerRequestInterface
     {
         $request = $this->createMock(ServerRequestInterface::class);
         $request

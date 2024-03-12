@@ -10,7 +10,7 @@ use Ramsey\Uuid\Exception\InvalidUuidStringException;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 
-class ParameterLocationProvider extends AbstractLocationProvider
+final class ParameterLocationProvider extends AbstractLocationProvider
 {
     public function provideLocation(UuidInterface $uuid, ServerRequestInterface $request): UriInterface
     {

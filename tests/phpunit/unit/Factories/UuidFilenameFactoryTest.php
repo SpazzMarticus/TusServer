@@ -6,9 +6,9 @@ namespace SpazzMarticus\Tus\Factories;
 
 use SplFileInfo;
 
-class UuidFilenameFactoryTest extends AbstractFilenameFactoryTestCase
+final class UuidFilenameFactoryTest extends AbstractFilenameFactoryTestCase
 {
-    protected UuidFilenameFactory $factory;
+    private UuidFilenameFactory $factory;
 
     protected function setUp(): void
     {

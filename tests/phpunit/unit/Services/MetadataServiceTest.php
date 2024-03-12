@@ -7,9 +7,9 @@ namespace SpazzMarticus\Tus\Services;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
 
-class MetadataServiceTest extends TestCase
+final class MetadataServiceTest extends TestCase
 {
-    protected MetadataService $metadataService;
+    private MetadataService $metadataService;
 
     protected function setUp(): void
     {
@@ -23,7 +23,7 @@ class MetadataServiceTest extends TestCase
         self::assertSame([], $this->metadataService->getMetadata($request));
     }
 
-    protected function mockRequest(string $header): RequestInterface
+    private function mockRequest(string $header): RequestInterface
     {
         $request = $this->createMock(RequestInterface::class);
         $request
