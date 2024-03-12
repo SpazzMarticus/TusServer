@@ -17,7 +17,7 @@ class ParameterLocationProvider extends AbstractLocationProvider
         $uri = $request->getUri();
         $uuidQuery = http_build_query(['uuid' => $uuid->toString()]);
 
-        return $uri->withQuery($uri->getQuery() !== '' && $uri->getQuery() !== '0' ? $uri->getQuery() . '&' . $uuidQuery : $uuidQuery);
+        return $uri->withQuery($uri->getQuery() !== '' ? $uri->getQuery() . '&' . $uuidQuery : $uuidQuery);
     }
 
     public function provideUuid(ServerRequestInterface $request): UuidInterface

@@ -494,7 +494,7 @@ class TusServer implements LoggerAwareInterface, RequestHandlerInterface
      */
     protected function getHeaderScalar(RequestInterface $request, string $key): ?string
     {
-        return $request->getHeaderLine($key) !== '' && $request->getHeaderLine($key) !== '0' ? $request->getHeaderLine($key) : null;
+        return $request->getHeaderLine($key) !== '' ? $request->getHeaderLine($key) : null;
     }
 
     protected function tryDeleteFile(SplFileInfo $file): void
