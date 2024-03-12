@@ -12,6 +12,6 @@
     "homepage": "https://github.com/SpazzMarticus/tus#readme",
     "private": true,
     "devDependencies": {
-        "newman": "^5.3.2"
+        "newman": "^6.1.1"
     }
 }
