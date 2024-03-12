@@ -8,10 +8,8 @@ use Psr\Http\Message\StreamInterface;
 use RuntimeException as BaseRuntimeException;
 use SpazzMarticus\Tus\Exceptions\ConflictException;
 use SpazzMarticus\Tus\Exceptions\RuntimeException;
-use SplFileInfo;
-use SplFileObject;
 
-final class FileService
+final class FileService implements FileServiceInterface
 {
     /**
      * Size of chunks to transfer from stream
@@ -24,26 +22,20 @@ final class FileService
         $this->chunkSize = $chunkSize;
     }
 
-    public function instance(string $path): SplFileInfo
+    public function create(string $filePath): void
     {
-        return new SplFileInfo($path);
-    }
-
-    public function create(SplFileInfo $file): void
-    {
-        if ($this->exists($file)) {
-            throw new RuntimeException('File ' . $file->getPathname() . ' already exists');
+        if ($this->exists($filePath)) {
+            throw new RuntimeException('File ' . $filePath . ' already exists');
         }
 
-        //Psst! (fopen won't stop yapping without the magic @ duct-tape)
-        if (@fopen($file->getPathname(), 'w') === false) {
-            throw new RuntimeException('File ' . $file->getPathname() . ' could not be created');
+        if (touch($filePath) === false) {
+            throw new RuntimeException('File ' . $filePath . ' could not be created');
         }
     }
 
-    public function exists(SplFileInfo $file): bool
+    public function exists(string $filePath): bool
     {
-        $pathname = $file->getPathname();
+        $pathname = $filePath;
         /**
          * Affected by status cache
          * @see https://www.php.net/manual/en/function.clearstatcache.php
@@ -53,9 +45,9 @@ final class FileService
         return file_exists($pathname);
     }
 
-    public function size(SplFileInfo $file): int
+    public function size(string $filePath): int
     {
-        $pathname = $file->getPathname();
+        $pathname = $filePath;
         /**
          * Affected by status cache
          * @see https://www.php.net/manual/en/function.clearstatcache.php
@@ -65,27 +57,32 @@ final class FileService
         return filesize($pathname) ?: 0;
     }
 
-    public function delete(SplFileInfo $file): void
+    public function delete(string $filePath): void
     {
-        if (!$this->exists($file)) {
+        if (!$this->exists($filePath)) {
             return;
         }
 
-        if (unlink($file->getPathname())) {
+        if (unlink($filePath)) {
             return;
         }
 
         throw new RuntimeException("Could not delete file");
     }
 
-    public function open(SplFileInfo $file): SplFileObject
+    public function open(string $filePath)
     {
-        return new SplFileObject($file->getPathname(), 'rb+');
+        $resource = fopen($filePath, 'rb+');
+        if (false === $resource) {
+            throw new RuntimeException("Could not open file at " . $filePath);
+        }
+
+        return $resource;
     }
 
-    public function point(SplFileObject $handle, int $offset): void
+    public function point($handle, int $offset): void
     {
-        if ($handle->fseek($offset) !== 0) {
+        if (fseek($handle, $offset) !== 0) {
             throw new RuntimeException('Can not set pointer in file');
         }
     }
@@ -94,9 +91,9 @@ final class FileService
      * @throws RuntimeException
      * @throws ConflictException if size limit is exceeded
      */
-    public function copyFromStream(SplFileObject $handle, StreamInterface $stream, ?int $sizeLimit = null): int
+    public function copyFromStream($handle, StreamInterface $stream, ?int $sizeLimit = null): int
     {
-        $bytesTransfered = 0;
+        $bytesTransferred = 0;
 
         /**
          * Writing Input to Chunk
@@ -117,23 +114,23 @@ final class FileService
                 break;
             }
 
-            $bytes = $handle->fwrite($chunk);
+            $bytes = fwrite($handle, $chunk);
 
             if ($bytes === 0) {
                 throw new RuntimeException("Error when writing file");
             }
 
-            if ($handle->fflush() === false) {
+            if (fflush($handle) === false) {
                 throw new RuntimeException("Error when flushing file");
             }
 
-            $bytesTransfered += $bytes;
+            $bytesTransferred += $bytes;
 
-            if ($sizeLimit && $bytesTransfered > $sizeLimit) {
+            if ($sizeLimit && $bytesTransferred > $sizeLimit) {
                 throw new ConflictException("Upload exceeds max allowed size");
             }
         }
 
-        return $bytesTransfered;
+        return $bytesTransferred;
     }
 }

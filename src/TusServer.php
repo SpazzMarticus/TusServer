@@ -13,7 +13,6 @@ use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
-use Psr\Log\NullLogger;
 use Psr\SimpleCache\CacheInterface;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
@@ -25,8 +24,8 @@ use SpazzMarticus\Tus\Exceptions\UnexpectedValueException;
 use SpazzMarticus\Tus\Factories\FilenameFactoryInterface;
 use SpazzMarticus\Tus\Providers\LocationProviderInterface;
 use SpazzMarticus\Tus\Services\FileService;
+use SpazzMarticus\Tus\Services\FileServiceInterface;
 use SpazzMarticus\Tus\Services\MetadataService;
-use SplFileInfo;
 
 /**
  * @phpstan-type StorageArrayShape array{
@@ -43,14 +42,7 @@ final class TusServer implements LoggerAwareInterface, RequestHandlerInterface
 {
     use LoggerAwareTrait;
 
-    protected const SUPPORTED_VERSIONS = ['1.0.0'];
-
-    /**
-     * Package-Dependencies
-     */
-    private FileService $fileService;
-
-    private MetadataService $metadataService;
+    private const SUPPORTED_VERSIONS = ['1.0.0'];
 
     /**
      * Size Settings
@@ -77,17 +69,18 @@ final class TusServer implements LoggerAwareInterface, RequestHandlerInterface
         /**
          * PSR-Dependencies
          */
-        protected ResponseFactoryInterface $responseFactory,
-        protected StreamFactoryInterface $streamFactory,
-        protected CacheInterface $storage,
-        protected EventDispatcherInterface $eventDispatcher,
-        protected FilenameFactoryInterface $targetFileFactory,
-        protected LocationProviderInterface $locationProvider
-    ) {
-        $this->logger = new NullLogger();
-        $this->fileService = new FileService();
-        $this->metadataService = new MetadataService();
-    }
+        private readonly ResponseFactoryInterface $responseFactory,
+        private readonly StreamFactoryInterface $streamFactory,
+        private readonly CacheInterface $storage,
+        private readonly EventDispatcherInterface $eventDispatcher,
+        private readonly FilenameFactoryInterface $targetFileFactory,
+        private readonly LocationProviderInterface $locationProvider,
+        /**
+         * Package-Dependencies
+         */
+        private readonly FileServiceInterface $fileService = new FileService(),
+        private readonly MetadataService $metadataService = new MetadataService(),
+    ) {}
 
     /**
      * Implemented for future implementation of Checksum-Extension as defined in tus.io-Protocol.
@@ -138,7 +131,7 @@ final class TusServer implements LoggerAwareInterface, RequestHandlerInterface
         /**
          * Check for supported versions. Get calls - since not part of protocol - do usually not include a client version
          */
-        if (!\in_array($clientVersion, self::SUPPORTED_VERSIONS) && $method !== 'GET') {
+        if ($method !== 'GET' && !\in_array($clientVersion, self::SUPPORTED_VERSIONS, true)) {
             return $this->createResponse(412); //Precondition Failed
         }
 
@@ -176,7 +169,7 @@ final class TusServer implements LoggerAwareInterface, RequestHandlerInterface
             return $this->createResponse(404);
         }
 
-        $targetFile = $this->fileService->instance($storage['file']);
+        $targetFile = $storage['file'];
 
         if (!$this->fileService->exists($targetFile)) {
             $this->storage->delete($uuid->getHex()->toString());
@@ -216,11 +209,7 @@ final class TusServer implements LoggerAwareInterface, RequestHandlerInterface
 
         $metadata = $this->metadataService->getMetadata($request);
 
-        $targetFile = $this->targetFileFactory->generateFilename($uuid, $metadata);
-
-        if (!is_dir($targetFile->getPath())) {
-            throw new RuntimeException($targetFile->getPath() . ' is not a directory');
-        }
+        $targetFilePath = $this->targetFileFactory->generateFilename($uuid, $metadata);
 
         /** @var StorageArrayShape $storage */
         $storage = [
@@ -228,13 +217,13 @@ final class TusServer implements LoggerAwareInterface, RequestHandlerInterface
             'length' => $length,
             'defer' => $defer,
             'metadata' => $metadata,
-            'file' => $targetFile->getPathname(),
+            'file' => $targetFilePath,
         ];
 
         $this->storage->set($uuid->getHex()->toString(), $storage);
 
         try {
-            $this->fileService->create($targetFile);
+            $this->fileService->create($targetFilePath);
         } catch (RuntimeException $runtimeException) {
             $this->storage->delete($uuid->getHex()->toString());
 
@@ -256,7 +245,7 @@ final class TusServer implements LoggerAwareInterface, RequestHandlerInterface
 
         $response = $response->withHeader('Upload-Offset', "0");
 
-        $this->eventDispatcher->dispatch(new UploadStarted($uuid, $targetFile, $storage['metadata']));
+        $this->eventDispatcher->dispatch(new UploadStarted($uuid, $targetFilePath, $storage['metadata']));
 
         return $response;
     }
@@ -299,15 +288,15 @@ final class TusServer implements LoggerAwareInterface, RequestHandlerInterface
             }
         }
 
-        $targetFile = $this->fileService->instance($storage['file']);
+        $filePath = $storage['file'];
 
-        if (!$this->fileService->exists($targetFile)) {
+        if (!$this->fileService->exists($filePath)) {
             return $this->createResponse(404);
         }
 
         $offset = (int) $this->getHeaderScalar($request, 'Upload-Offset');
 
-        $size = $this->fileService->size($targetFile);
+        $size = $this->fileService->size($filePath);
 
         if ($size !== $offset) {
             /**
@@ -317,34 +306,32 @@ final class TusServer implements LoggerAwareInterface, RequestHandlerInterface
         }
 
         if ($this->useIntermediateChunk) {
-            $tempFile = tempnam($this->chunkDirectory, $uuid->getHex()->toString());
-            \assert(\is_string($tempFile));
+            $chunkFile = tempnam($this->chunkDirectory, $uuid->getHex()->toString());
+            \assert(\is_string($chunkFile));
 
-            $chunkFile = new SplFileInfo($tempFile);
             $chunkHandle = $this->fileService->open($chunkFile);
         }
 
-        $fileHandle = $this->fileService->open($targetFile);
+        $fileHandle = $this->fileService->open($filePath);
         $this->fileService->point($fileHandle, $offset);
 
         try {
             /**
              * $this->useIntermediateChunk is not altered while running this method.
              */
-            $bytesTransfered = $this->fileService->copyFromStream($this->useIntermediateChunk ? $chunkHandle : $fileHandle, $request->getBody(), ($defer ? $this->maxSize : $storage['length']) - $offset);
+            $bytesTransferred = $this->fileService->copyFromStream($this->useIntermediateChunk ? $chunkHandle : $fileHandle, $request->getBody(), ($defer ? $this->maxSize : $storage['length']) - $offset);
         } catch (ConflictException) {
             /**
              * Delete upload on Conflict, because upload size was exceeded
              */
-            $this->tryDeleteFile($targetFile);
+            $this->tryDeleteFile($filePath);
             $this->storage->delete($uuid->getHex()->toString());
 
             return $this->createResponse(409); //Conflict
         }
 
         if ($this->useIntermediateChunk) {
-            unset($chunkHandle);
-            $exception = null;
+            fclose($chunkHandle);
 
             try {
                 /**
@@ -357,32 +344,30 @@ final class TusServer implements LoggerAwareInterface, RequestHandlerInterface
                 if (
                     $this->fileService->copyFromStream(
                         $fileHandle,
-                        $this->streamFactory->createStreamFromFile($chunkFile->getPathname()),
-                    ) !== $bytesTransfered
+                        $this->streamFactory->createStreamFromFile($chunkFile),
+                    ) !== $bytesTransferred
                 ) {
-                    throw new RuntimeException('Error when copying ' . $chunkFile->getPathname() . ' to target file ' . $targetFile->getPathname());
+                    throw new RuntimeException('Error when copying ' . $chunkFile . ' to target file ' . $filePath);
                 }
             } finally {
-                /**
-                 * Clean up and rethrow
-                 */
-                unset($fileHandle);
+                fclose($fileHandle);
+
                 $this->tryDeleteFile($chunkFile);
                 $this->storage->delete($uuid->getHex()->toString());
             }
         }
 
-        $size = $this->fileService->size($targetFile);
+        $size = $this->fileService->size($filePath);
 
         if ($defer) {
-            if ($offset + $bytesTransfered > $this->maxSize) {
-                $this->tryDeleteFile($targetFile);
+            if ($offset + $bytesTransferred > $this->maxSize) {
+                $this->tryDeleteFile($filePath);
                 $this->storage->delete($uuid->getHex()->toString());
 
                 return $this->createResponse(409, $response);
             }
-        } elseif ($offset + $bytesTransfered !== $size) {
-            $this->tryDeleteFile($targetFile);
+        } elseif ($offset + $bytesTransferred !== $size) {
+            $this->tryDeleteFile($filePath);
             $this->storage->delete($uuid->getHex()->toString());
 
             return $this->createResponse(409, $response);
@@ -403,7 +388,7 @@ final class TusServer implements LoggerAwareInterface, RequestHandlerInterface
             $storage['complete'] = true;
             $this->storage->set($uuid->getHex()->toString(), $storage, $this->storageTTLAfterUploadComplete);
 
-            $this->eventDispatcher->dispatch(new UploadComplete($uuid, $targetFile, $storage['metadata']));
+            $this->eventDispatcher->dispatch(new UploadComplete($uuid, $filePath, $storage['metadata']));
         }
 
         return $response;
@@ -439,14 +424,14 @@ final class TusServer implements LoggerAwareInterface, RequestHandlerInterface
             return $this->createResponse(403);
         }
 
-        $targetFile = $this->fileService->instance($storage['file']);
+        $targetFile = $storage['file'];
 
         if (!$this->fileService->exists($targetFile)) {
             return $this->createResponse(404);
         }
 
         $response =  $this->createResponse(200)
-            ->withBody($this->streamFactory->createStreamFromFile($targetFile->getPathname()))
+            ->withBody($this->streamFactory->createStreamFromFile($targetFile))
         ;
 
         /**
@@ -454,7 +439,7 @@ final class TusServer implements LoggerAwareInterface, RequestHandlerInterface
          * @see https://stackoverflow.com/a/5677844
          */
         $response = $response->withHeader('Content-Length', (string) $this->fileService->size($targetFile))
-            ->withHeader('Content-Disposition', 'attachment; filename="' . $targetFile->getFilename() . '"')
+            ->withHeader('Content-Disposition', 'attachment; filename="' . $targetFile . '"')
             ->withHeader('Content-Transfer-Encoding', 'binary')
         ;
 
@@ -497,12 +482,12 @@ final class TusServer implements LoggerAwareInterface, RequestHandlerInterface
         return $request->getHeaderLine($key) !== '' ? $request->getHeaderLine($key) : null;
     }
 
-    private function tryDeleteFile(SplFileInfo $file): void
+    private function tryDeleteFile(string $filePath): void
     {
         try {
-            $this->fileService->delete($file);
+            $this->fileService->delete($filePath);
         } catch (RuntimeException) {
-            $this->logger?->notice('Could not delete file ' . $file->getPathname());
+            $this->logger?->notice('Could not delete file ' . $filePath);
         }
     }
 }

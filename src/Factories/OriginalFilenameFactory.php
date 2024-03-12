@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace SpazzMarticus\Tus\Factories;
 
 use Ramsey\Uuid\UuidInterface;
-use SplFileInfo;
 
-final class OriginalFilenameFactory implements FilenameFactoryInterface
+final readonly class OriginalFilenameFactory implements FilenameFactoryInterface
 {
-    public function __construct(protected string $directory) {}
+    public function __construct(
+        private string $directory,
+    ) {}
 
-    public function generateFilename(UuidInterface $uuid, array $metadata): SplFileInfo
+    public function generateFilename(UuidInterface $uuid, array $metadata): string
     {
         $filename = $metadata['name'] ?? $metadata['filename'] ?? null;
 
@@ -22,6 +23,6 @@ final class OriginalFilenameFactory implements FilenameFactoryInterface
             $filename = $uuid->getHex();
         }
 
-        return new SplFileInfo($this->directory . $filename);
+        return $this->directory . $filename;
     }
 }

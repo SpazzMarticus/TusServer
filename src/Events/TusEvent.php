@@ -6,7 +6,6 @@ namespace SpazzMarticus\Tus\Events;
 
 use Psr\EventDispatcher\StoppableEventInterface;
 use Ramsey\Uuid\UuidInterface;
-use SplFileInfo;
 
 abstract class TusEvent implements StoppableEventInterface
 {
@@ -15,14 +14,18 @@ abstract class TusEvent implements StoppableEventInterface
     /**
      * @param array<string, mixed> $metadata
      */
-    public function __construct(protected UuidInterface $uuid, protected SplFileInfo $file, protected array $metadata) {}
+    public function __construct(
+        private readonly UuidInterface $uuid,
+        private readonly string $file,
+        private readonly array $metadata,
+    ) {}
 
     public function getUuid(): UuidInterface
     {
         return $this->uuid;
     }
 
-    public function getFile(): SplFileInfo
+    public function getFile(): string
     {
         return $this->file;
     }

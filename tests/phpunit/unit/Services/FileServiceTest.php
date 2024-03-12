@@ -13,8 +13,6 @@ use Psr\Http\Message\StreamInterface;
 use RuntimeException as GlobalRuntimeException;
 use SpazzMarticus\Tus\Exceptions\ConflictException;
 use SpazzMarticus\Tus\Exceptions\RuntimeException;
-use SplFileInfo;
-use SplFileObject;
 
 final class FileServiceTest extends TestCase
 {
@@ -33,33 +31,26 @@ final class FileServiceTest extends TestCase
         $this->fsRoot->addChild($this->fsDir);
     }
 
-    public function testInstance(): void
+    private function getTargetFilePath(): string
     {
-        self::assertSame(__FILE__, $this->fileService->instance(__FILE__)->getPathname());
+        return vfsStream::url('root/files/target.file');
     }
 
-    private function getTargetFile(): SplFileInfo
-    {
-        return $this->fileService->instance(vfsStream::url('root/files/target.file'));
-    }
-
-    #[Depends('testInstance')]
     public function testCreateSuccess(): void
     {
-        $file = $this->getTargetFile();
+        $file = $this->getTargetFilePath();
 
         self::assertFalse($this->fileService->exists($file));
         $this->fileService->create($file);
         self::assertTrue($this->fileService->exists($file));
     }
 
-    #[Depends('testInstance')]
     #[Depends('testCreateSuccess')]
     public function testCreateNoOverwrite(): void
     {
         $this->fsDir->addChild(vfsStream::newFile('target.file'));
 
-        $file = $this->getTargetFile();
+        $file = $this->getTargetFilePath();
 
         self::assertTrue($this->fileService->exists($file));
 
@@ -67,11 +58,10 @@ final class FileServiceTest extends TestCase
         $this->fileService->create($file);
     }
 
-    #[Depends('testInstance')]
     public function testCreateFailure(): void
     {
         $this->fsDir->chmod(0o000);
-        $file = $this->getTargetFile();
+        $file = $this->getTargetFilePath();
 
         self::assertFalse($this->fileService->exists($file));
 
@@ -79,19 +69,17 @@ final class FileServiceTest extends TestCase
         $this->fileService->create($file);
     }
 
-    #[Depends('testInstance')]
     #[Depends('testCreateSuccess')]
     public function testDeleteSuccess(): void
     {
         $this->fsDir->addChild(vfsStream::newFile('target.file')->withContent('1234567'));
-        $file = $this->getTargetFile();
+        $file = $this->getTargetFilePath();
 
         self::assertTrue($this->fileService->exists($file));
         $this->fileService->delete($file);
         self::assertFalse($this->fileService->exists($file));
     }
 
-    #[Depends('testInstance')]
     #[Depends('testCreateSuccess')]
     public function testDeleteFailure(): void
     {
@@ -103,7 +91,7 @@ final class FileServiceTest extends TestCase
          */
         $this->fsDir->chmod(0o000);
 
-        $file = $this->getTargetFile();
+        $file = $this->getTargetFilePath();
 
         self::assertTrue($this->fileService->exists($file));
 
@@ -135,9 +123,12 @@ final class FileServiceTest extends TestCase
         return $stream;
     }
 
-    private function getTargetHandle(): SplFileObject
+    /**
+     * @return resource
+     */
+    private function getTargetHandle()
     {
-        $targetFile = $this->getTargetFile();
+        $targetFile = $this->getTargetFilePath();
 
         $this->fileService->create($targetFile);
 
@@ -155,7 +146,6 @@ final class FileServiceTest extends TestCase
         return $chunkSize > 0 ? str_split($string, $chunkSize) : [$string];
     }
 
-    #[Depends('testInstance')]
     #[Depends('testCreateSuccess')]
     #[DataProvider('providerCopyFromStream')]
     public function testCopyFromStream(string $content, int $chunkSize): void
@@ -168,8 +158,8 @@ final class FileServiceTest extends TestCase
         $bytesTransferred = $this->fileService->copyFromStream($targetHandle, $stream);
 
         self::assertSame(\strlen($content), $bytesTransferred);
-        self::assertSame($bytesTransferred, $this->fileService->size($targetHandle));
-        self::assertSame($content, file_get_contents($targetHandle->getPathname()));
+        self::assertSame($bytesTransferred, $this->fileService->size($this->getTargetFilePath()));
+        self::assertSame($content, file_get_contents($this->getTargetFilePath()));
     }
 
     public static function providerCopyFromStream(): \Iterator
@@ -230,7 +220,6 @@ final class FileServiceTest extends TestCase
         ];
     }
 
-    #[Depends('testInstance')]
     #[Depends('testCopyFromStream')]
     public function testCopyFromStreamSizeLimit(): void
     {
@@ -248,7 +237,6 @@ final class FileServiceTest extends TestCase
         $this->fileService->copyFromStream($targetHandle, $stream, $sizeLimit);
     }
 
-    #[Depends('testInstance')]
     #[Depends('testCopyFromStream')]
     public function testCopyFromStreamChunkSize(): void
     {
@@ -263,11 +251,10 @@ final class FileServiceTest extends TestCase
         $bytesTransferred = $this->fileService->copyFromStream($targetHandle, $stream);
 
         self::assertSame(\strlen($content), $bytesTransferred);
-        self::assertSame($bytesTransferred, $this->fileService->size($targetHandle));
-        self::assertSame($content, file_get_contents($targetHandle->getPathname()));
+        self::assertSame($bytesTransferred, $this->fileService->size($this->getTargetFilePath()));
+        self::assertSame($content, file_get_contents($this->getTargetFilePath()));
     }
 
-    #[Depends('testInstance')]
     #[Depends('testCopyFromStream')]
     public function testCopyFromStreamThrowingException(): void
     {
@@ -289,78 +276,48 @@ final class FileServiceTest extends TestCase
         $this->fileService->copyFromStream($targetHandle, $stream);
     }
 
-    #[Depends('testInstance')]
     #[Depends('testCreateSuccess')]
     #[Depends('testCopyFromStream')]
     public function testCopyFromStreamWritingThrowsException(): void
     {
         $stream = $this->mockStream(['1234','5678']);
 
-        $file = $this->getTargetFile();
+        $file = $this->getTargetFilePath();
 
         $this->fileService->create($file);
-
-        $targetHandle = $this
-            ->getMockBuilder(SplFileObject::class)
-            ->setConstructorArgs([ $file->getPathname()])
-            ->getMock()
-        ;
-        $targetHandle
-            ->expects(self::once())
-            ->method('fwrite')
-            ->willReturn(0)
-        ;
+        $this->fsDir->chmod(0);
 
         $this->expectException(RuntimeException::class);
-        $this->fileService->copyFromStream($targetHandle, $stream);
+        $this->fileService->copyFromStream($this->getTargetHandle(), $stream);
     }
 
-    #[Depends('testInstance')]
     #[Depends('testCreateSuccess')]
     #[Depends('testCopyFromStream')]
     public function testCopyFromStreamFlushingThrowsException(): void
     {
         $stream = $this->mockStream(['1234','5678']);
 
-        $file = $this->getTargetFile();
+        $file = $this->getTargetFilePath();
 
         $this->fileService->create($file);
-
-        $targetHandle = $this
-            ->getMockBuilder(SplFileObject::class)
-            ->setConstructorArgs([ $file->getPathname()])
-            ->getMock()
-        ;
-        $targetHandle
-            ->expects(self::once())
-            ->method('fwrite')
-            ->willReturn(4)
-        ;
-        $targetHandle
-            ->expects(self::once())
-            ->method('fflush')
-            ->willReturn(false)
-        ;
+        $this->fsDir->chmod(0);
 
         $this->expectException(RuntimeException::class);
-        $this->fileService->copyFromStream($targetHandle, $stream);
+        $this->fileService->copyFromStream($this->getTargetHandle(), $stream);
     }
 
-
-    #[Depends('testInstance')]
     #[Depends('testCreateSuccess')]
     public function testPointSuccess(): void
     {
         $targetHandle = $this->getTargetHandle();
-        $targetHandle->fwrite('0000-0000-0000-0000-0000');
+        fwrite($targetHandle, '0000-0000-0000-0000-0000');
 
         $this->fileService->point($targetHandle, 10);
-        $targetHandle->fwrite('4711');
+        fwrite($targetHandle, '4711');
 
-        self::assertSame('0000-0000-4711-0000-0000', file_get_contents($targetHandle->getPathname()));
+        self::assertSame('0000-0000-4711-0000-0000', file_get_contents($this->getTargetFilePath()));
     }
 
-    #[Depends('testInstance')]
     #[Depends('testCreateSuccess')]
     #[Depends('testCopyFromStream')]
     public function testPointFailure(): void

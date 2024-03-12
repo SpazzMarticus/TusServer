@@ -6,7 +6,6 @@ namespace SpazzMarticus\Tus\Factories;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use Ramsey\Uuid\Uuid;
-use SplFileInfo;
 
 final class OriginalFilenameFactoryTest extends AbstractFilenameFactoryTestCase
 {
@@ -25,7 +24,7 @@ final class OriginalFilenameFactoryTest extends AbstractFilenameFactoryTestCase
     #[DataProvider('providerGenerateFilename')]
     public function testGenerateFilename(string $expectedFilename, array $metadata): void
     {
-        $expectedFilename = new SplFileInfo(sprintf('%s/%s', $this->directory, $expectedFilename));
+        $expectedFilename = $this->directory . $expectedFilename;
 
         self::assertEquals($expectedFilename, $this->factory->generateFilename($this->uuid, $metadata));
     }
@@ -64,7 +63,7 @@ final class OriginalFilenameFactoryTest extends AbstractFilenameFactoryTestCase
     {
         file_put_contents($this->directory . 'alreadyUploaded.bin', 'payload');
 
-        $expectedFilename = new SplFileInfo($this->directory . $this->uuid->getHex());
+        $expectedFilename = $this->directory . $this->uuid->getHex();
 
         self::assertEquals($expectedFilename, $this->factory->generateFilename($this->uuid, [
             'name' => 'alreadyUploaded.bin',
