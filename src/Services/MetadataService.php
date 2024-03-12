@@ -18,12 +18,13 @@ class MetadataService
     {
         $metadata = [];
 
-        if ($metadataHeader = $request->getHeaderLine('Upload-Metadata')) {
+        if (($metadataHeader = $request->getHeaderLine('Upload-Metadata')) !== '') {
             foreach (explode(',', $metadataHeader) as $keyValuePair) {
                 $keyValuePair = explode(' ', $keyValuePair);
                 if (!isset($keyValuePair[0])) {
                     continue;
                 }
+
                 $metadata[$keyValuePair[0]] = isset($keyValuePair[1]) ? base64_decode($keyValuePair[1]) : null;
             }
         }

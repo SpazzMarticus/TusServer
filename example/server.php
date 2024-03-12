@@ -2,28 +2,29 @@
 
 declare(strict_types=1);
 
-use SpazzMarticus\Tus\Events\UploadComplete;
-use SpazzMarticus\Tus\TusServer;
-use Laminas\Diactoros\ServerRequestFactory;
+use Cache\Adapter\Filesystem\FilesystemCachePool;
 use Laminas\Diactoros\ResponseFactory;
+use Laminas\Diactoros\ServerRequestFactory;
 use Laminas\Diactoros\StreamFactory;
-use Symfony\Component\EventDispatcher\EventDispatcher;
 use Laminas\HttpHandlerRunner\Emitter\SapiEmitter;
 use League\Flysystem\Adapter\Local;
 use League\Flysystem\Filesystem;
-use Cache\Adapter\Filesystem\FilesystemCachePool;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
+use SpazzMarticus\Example\ExampleMiddleware;
+use SpazzMarticus\Tus\Events\UploadComplete;
 use SpazzMarticus\Tus\Factories\OriginalFilenameFactory;
 use SpazzMarticus\Tus\Factories\UuidFilenameFactory;
 use SpazzMarticus\Tus\Providers\ParameterLocationProvider;
 use SpazzMarticus\Tus\Providers\PathLocationProvider;
+use SpazzMarticus\Tus\TusServer;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 ini_set('display_errors', "1");
 ini_set('display_startup_errors', "1");
 ini_set('html_errors', "0");
 ini_set("error_log", __DIR__ . '/php-error.log');
-error_reporting(E_ALL);
+error_reporting(\E_ALL);
 
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/ExampleMiddleware.php';
@@ -57,7 +58,7 @@ $streamFactory = new StreamFactory();
  * - Psr\Http\Server\MiddlewareInterface
  * @see https://packagist.org/providers/psr/http-server-handler-implementation
  */
-$middleware = new \SpazzMarticus\Example\ExampleMiddleware($responseFactory, $streamFactory, $uploadDirectory, $chunkDirectory, $cacheDirectory);
+$middleware = new ExampleMiddleware($responseFactory, $streamFactory, $uploadDirectory, $chunkDirectory, $cacheDirectory);
 
 /**
  * PSR-16 Simple Cache (Common Interface for Caching Libraries)
@@ -79,7 +80,7 @@ $dispatcher = new EventDispatcher();
  * - UploadStarted
  * - UploadComplete
  */
-$dispatcher->addListener(UploadComplete::class, function (UploadComplete $event): void {});
+$dispatcher->addListener(UploadComplete::class, static function (UploadComplete $event): void {});
 
 /**
  * (optional)

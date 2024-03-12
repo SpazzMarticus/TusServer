@@ -6,11 +6,11 @@ namespace SpazzMarticus\Tus\Factories;
 
 use SplFileInfo;
 
-class UuidFilenameFactoryTest extends AbstractFilenameFactoryTest
+class UuidFilenameFactoryTest extends AbstractFilenameFactoryTestCase
 {
     protected UuidFilenameFactory $factory;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         $this->factory = new UuidFilenameFactory($this->directory);
@@ -22,6 +22,6 @@ class UuidFilenameFactoryTest extends AbstractFilenameFactoryTest
 
         $expectedFilename = new SplFileInfo($this->directory . $this->uuid->getHex());
 
-        $this->assertEquals($expectedFilename, $this->factory->generateFilename($this->uuid, $metadata));
+        self::assertEquals($expectedFilename, $this->factory->generateFilename($this->uuid, $metadata));
     }
 }

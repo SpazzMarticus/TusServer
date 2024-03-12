@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace SpazzMarticus\Tus\Providers;
 
-use Ramsey\Uuid\Uuid;
-use Psr\Http\Message\ServerRequestInterface;
-use SpazzMarticus\Tus\Exceptions\UnexpectedValueException;
 use Laminas\Diactoros\Uri;
+use Psr\Http\Message\ServerRequestInterface;
+use Ramsey\Uuid\Uuid;
+use SpazzMarticus\Tus\Exceptions\UnexpectedValueException;
 
-class ParameterLocationProviderTest extends AbstractLocationProviderTest
+class ParameterLocationProviderTest extends AbstractLocationProviderTestCase
 {
     protected ParameterLocationProvider $provider;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -29,7 +29,7 @@ class ParameterLocationProviderTest extends AbstractLocationProviderTest
 
         $expectedUri = new Uri("https://www.example.org/path/to/application?param1=value1&param2&param3=value3&uuid=6e78f7aa-7e90-4f59-8701-ea925d340b5f");
 
-        $this->assertEquals($expectedUri, $this->provider->provideLocation($uuid, $request));
+        self::assertEquals($expectedUri, $this->provider->provideLocation($uuid, $request));
     }
 
     public function testProvideLocationWithoutExistingQueryParams(): void
@@ -41,7 +41,7 @@ class ParameterLocationProviderTest extends AbstractLocationProviderTest
 
         $expectedUri = new Uri("https://www.example.org/path/to/application?uuid=6e78f7aa-7e90-4f59-8701-ea925d340b5f");
 
-        $this->assertEquals($expectedUri, $this->provider->provideLocation($uuid, $request));
+        self::assertEquals($expectedUri, $this->provider->provideLocation($uuid, $request));
     }
 
     /**
@@ -65,7 +65,7 @@ class ParameterLocationProviderTest extends AbstractLocationProviderTest
 
         $request = $this->mockServerRequestInterface(['uuid' => $uuidString]);
 
-        $this->assertEquals($uuid, $this->provider->provideUuid($request));
+        self::assertEquals($uuid, $this->provider->provideUuid($request));
     }
 
     public function testProvideInvalidUuid(): void
