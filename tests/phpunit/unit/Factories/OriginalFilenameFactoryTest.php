@@ -8,9 +8,9 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use Ramsey\Uuid\Uuid;
 use SplFileInfo;
 
-class OriginalFilenameFactoryTest extends AbstractFilenameFactoryTestCase
+final class OriginalFilenameFactoryTest extends AbstractFilenameFactoryTestCase
 {
-    protected OriginalFilenameFactory $factory;
+    private OriginalFilenameFactory $factory;
 
     protected function setUp(): void
     {

@@ -7,7 +7,7 @@ namespace SpazzMarticus\Tus\Factories;
 use Ramsey\Uuid\UuidInterface;
 use SplFileInfo;
 
-class UuidFilenameFactory implements FilenameFactoryInterface
+final class UuidFilenameFactory implements FilenameFactoryInterface
 {
     public function __construct(protected string $directory) {}
 

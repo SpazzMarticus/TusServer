@@ -11,9 +11,9 @@ use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 use SpazzMarticus\Tus\Exceptions\UnexpectedValueException;
 
-class PathLocationProviderTest extends AbstractLocationProviderTestCase
+final class PathLocationProviderTest extends AbstractLocationProviderTestCase
 {
-    protected PathLocationProvider $provider;
+    private PathLocationProvider $provider;
 
     protected function setUp(): void
     {
@@ -34,7 +34,7 @@ class PathLocationProviderTest extends AbstractLocationProviderTestCase
         self::assertEquals($expectedUri, $this->provider->provideLocation($uuid, $request));
     }
 
-    protected function mockServerRequestInterface(string $path): ServerRequestInterface
+    private function mockServerRequestInterface(string $path): ServerRequestInterface
     {
         $uri = new Uri($path);
 

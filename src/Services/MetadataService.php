@@ -6,7 +6,7 @@ namespace SpazzMarticus\Tus\Services;
 
 use Psr\Http\Message\RequestInterface;
 
-class MetadataService
+final class MetadataService
 {
     /**
      * Extract metadata-array from request
