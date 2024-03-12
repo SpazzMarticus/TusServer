@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SpazzMarticus\Tus\Services;
 
-use Mockery;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
 
-class MetadataServiceTest extends \PHPUnit\Framework\TestCase
+class MetadataServiceTest extends TestCase
 {
     protected MetadataService $metadataService;
 
@@ -15,6 +17,8 @@ class MetadataServiceTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * @param array<string, mixed> $expectedResult
+     *
      * @dataProvider providerGetMetdata
      */
     public function testGetMetadata(RequestInterface $request, array $expectedResult): void
@@ -24,14 +28,20 @@ class MetadataServiceTest extends \PHPUnit\Framework\TestCase
 
     protected function mockRequest(string $header): RequestInterface
     {
-        $request = Mockery::mock(RequestInterface::class);
-        $request->shouldReceive('getHeaderLine')
-            ->once()
+        $request = $this->createMock(RequestInterface::class);
+        $request
+            ->expects($this->once())
+            ->method('getHeaderLine')
             ->with('Upload-Metadata')
-            ->andReturn($header);
+            ->willReturn($header)
+        ;
+
         return $request;
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function providerGetMetdata(): array
     {
         $dataSets = [];
@@ -39,13 +49,13 @@ class MetadataServiceTest extends \PHPUnit\Framework\TestCase
         $request = $this->mockRequest('');
 
         $dataSets[] = [
-            $request, []
+            $request, [],
         ];
 
         $request = $this->mockRequest('');
 
         $dataSets[] = [
-            $request, []
+            $request, [],
         ];
 
         return $dataSets;

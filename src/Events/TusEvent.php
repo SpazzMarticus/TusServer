@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SpazzMarticus\Tus\Events;
 
 use Psr\EventDispatcher\StoppableEventInterface;
@@ -10,20 +12,10 @@ abstract class TusEvent implements StoppableEventInterface
 {
     private bool $propagationStopped = false;
 
-    protected UuidInterface $uuid;
-    protected SplFileInfo $file;
-
     /**
-     * @var array
+     * @param array<string, mixed> $metadata
      */
-    protected array $metadata;
-
-    public function __construct(UuidInterface $uuid, SplFileInfo $file, array $metadata)
-    {
-        $this->uuid = $uuid;
-        $this->file = $file;
-        $this->metadata = $metadata;
-    }
+    public function __construct(protected UuidInterface $uuid, protected SplFileInfo $file, protected array $metadata) {}
 
     public function getUuid(): UuidInterface
     {
@@ -35,6 +27,9 @@ abstract class TusEvent implements StoppableEventInterface
         return $this->file;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getMetadata(): array
     {
         return $this->metadata;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SpazzMarticus\Tus\Providers;
 
 use PHPUnit\Framework\TestCase;
@@ -12,6 +14,7 @@ abstract class AbstractLocationProviderTest extends TestCase
     protected function getRequest(UriInterface $uri): ServerRequestInterface
     {
         parse_str($uri->getQuery(), $params);
+
         return new ServerRequest([], [], $uri, null, 'php://input', [], [], $params);
     }
 }

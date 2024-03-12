@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SpazzMarticus\Tus\Factories;
 
 use org\bovigo\vfs\vfsStream;
@@ -21,7 +23,7 @@ abstract class AbstractFilenameFactoryTest extends TestCase
     protected function setupFilesystem(): void
     {
         vfsStream::setup('root', null, [
-            'uploads' => []
+            'uploads' => [],
         ]);
 
         $this->directory = vfsStream::url('root/uploads/');

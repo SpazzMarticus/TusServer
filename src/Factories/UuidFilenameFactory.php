@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SpazzMarticus\Tus\Factories;
 
 use SplFileInfo;
@@ -7,12 +9,7 @@ use Ramsey\Uuid\UuidInterface;
 
 class UuidFilenameFactory implements FilenameFactoryInterface
 {
-    protected $directory;
-
-    public function __construct(string $directory)
-    {
-        $this->directory = $directory;
-    }
+    public function __construct(protected string $directory) {}
 
     public function generateFilename(UuidInterface $uuid, array $metadata): SplFileInfo
     {

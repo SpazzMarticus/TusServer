@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SpazzMarticus\Tus\Services;
 
 use Psr\Http\Message\RequestInterface;
@@ -7,8 +9,10 @@ use Psr\Http\Message\RequestInterface;
 class MetadataService
 {
     /**
-     * Extract metadata-arry from request
+     * Extract metadata-array from request
      * @see https://tus.io/protocols/resumable-upload.html#upload-metadata
+     *
+     * @return array<string, mixed>
      */
     public function getMetadata(RequestInterface $request): array
     {

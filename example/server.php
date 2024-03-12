@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use SpazzMarticus\Tus\Events\UploadComplete;
 use SpazzMarticus\Tus\TusServer;
 use Laminas\Diactoros\ServerRequestFactory;
@@ -77,8 +79,7 @@ $dispatcher = new EventDispatcher();
  * - UploadStarted
  * - UploadComplete
  */
-$dispatcher->addListener(UploadComplete::class, function (UploadComplete $event) {
-});
+$dispatcher->addListener(UploadComplete::class, function (UploadComplete $event): void {});
 
 /**
  * (optional)

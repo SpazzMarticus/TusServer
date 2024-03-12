@@ -1,15 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SpazzMarticus\Tus\Providers;
 
 use Ramsey\Uuid\Uuid;
-use Mockery;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\UriInterface;
 use Ramsey\Uuid\UuidInterface;
 use SpazzMarticus\Tus\Exceptions\UnexpectedValueException;
 use Laminas\Diactoros\Uri;
-use Laminas\Diactoros\ServerRequest;
 
 class PathLocationProviderTest extends AbstractLocationProviderTest
 {
@@ -17,8 +16,9 @@ class PathLocationProviderTest extends AbstractLocationProviderTest
 
     public function setUp(): void
     {
-        $this->provider = new PathLocationProvider();
         parent::setUp();
+
+        $this->provider = new PathLocationProvider();
     }
 
     public function testProvideLocation(): void
@@ -35,9 +35,13 @@ class PathLocationProviderTest extends AbstractLocationProviderTest
 
     protected function mockServerRequestInterface(string $path): ServerRequestInterface
     {
-        $request = Mockery::mock(ServerRequestInterface::class);
-        $request->shouldReceive('getUri->getPath')
-            ->andReturn($path);
+        $uri = new Uri($path);
+
+        $request = $this->createMock(ServerRequestInterface::class);
+        $request
+            ->method('getUri')
+            ->willReturn($uri)
+        ;
 
         return $request;
     }
@@ -58,26 +62,30 @@ class PathLocationProviderTest extends AbstractLocationProviderTest
         }
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function providerProvideUuid(): array
     {
         $uuidString = '9cc981e6-4ebf-436a-a34d-0f2847d31685';
         $uuid = Uuid::fromString($uuidString);
+
         return [
             [
                 $this->mockServerRequestInterface(''),
-                null
+                null,
             ],
             [
                 $this->mockServerRequestInterface('path/this-is-not-a-valid-uuid'),
-                null
+                null,
             ],
             [
                 $this->mockServerRequestInterface('path/' . $uuidString),
-                $uuid
+                $uuid,
             ],
             [
                 $this->mockServerRequestInterface('this/is/a/longer/path/' . $uuidString),
-                $uuid
+                $uuid,
             ],
         ];
     }

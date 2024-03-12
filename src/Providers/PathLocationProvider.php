@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SpazzMarticus\Tus\Providers;
 
 use Psr\Http\Message\ServerRequestInterface;
@@ -8,12 +10,13 @@ use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 use Psr\Http\Message\UriInterface;
 
-class PathLocationProvider extends AbstractLocationProvider implements LocationProviderInterface
+class PathLocationProvider extends AbstractLocationProvider
 {
     public function provideLocation(UuidInterface $uuid, ServerRequestInterface $request): UriInterface
     {
         $uri = $request->getUri();
         $path = rtrim($uri->getPath(), '/');
+
         return $uri->withPath($path . '/' . $uuid->toString());
     }
 
@@ -24,7 +27,7 @@ class PathLocationProvider extends AbstractLocationProvider implements LocationP
 
         try {
             return Uuid::fromString($parts[array_key_last($parts)]);
-        } catch (InvalidUuidStringException $exception) {
+        } catch (InvalidUuidStringException) {
             throw $this->getInvalidUuidException();
         }
     }

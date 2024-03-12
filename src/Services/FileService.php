@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SpazzMarticus\Tus\Services;
 
 use SpazzMarticus\Tus\Exceptions\RuntimeException;
@@ -47,6 +49,7 @@ final class FileService
          * @see https://www.php.net/manual/en/function.clearstatcache.php
          */
         clearstatcache(false, $pathname);
+
         return file_exists($pathname);
     }
 
@@ -58,17 +61,14 @@ final class FileService
          * @see https://www.php.net/manual/en/function.clearstatcache.php
          */
         clearstatcache(false, $pathname);
+
         return filesize($pathname) ?: 0;
     }
 
     public function delete(SplFileInfo $file): void
     {
-        if ($this->exists($file)) {
-            if (!unlink($file->getPathname())) {
-                if ($this->exists($file)) {
-                    throw new RuntimeException("Could not delete file");
-                }
-            }
+        if ($this->exists($file) && !unlink($file->getPathname())) {
+            throw new RuntimeException("Could not delete file");
         }
     }
 
@@ -128,6 +128,7 @@ final class FileService
                 throw new ConflictException("Upload exceeds max allowed size");
             }
         }
+
         return $bytesTransfered;
     }
 }

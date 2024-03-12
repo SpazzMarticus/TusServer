@@ -1,9 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SpazzMarticus\Tus\Factories;
 
 use SplFileInfo;
-use SpazzMarticus\Tus\Factories\OriginalFilenameFactory;
 
 class OriginalFilenameFactoryTest extends AbstractFilenameFactoryTest
 {
@@ -12,9 +13,12 @@ class OriginalFilenameFactoryTest extends AbstractFilenameFactoryTest
     public function setUp(): void
     {
         parent::setUp();
+
         $this->factory = new OriginalFilenameFactory($this->directory);
     }
     /**
+     * @param array<string, mixed> $metadata
+     *
      * @dataProvider providerGenerateFilename
      */
     public function testGenerateFilename(string $expectedFilename, array $metadata): void
@@ -24,9 +28,13 @@ class OriginalFilenameFactoryTest extends AbstractFilenameFactoryTest
         $this->assertEquals($expectedFilename, $this->factory->generateFilename($this->uuid, $metadata));
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function providerGenerateFilename(): array
     {
         parent::setUp();
+
         return [
 
             /**
@@ -36,7 +44,7 @@ class OriginalFilenameFactoryTest extends AbstractFilenameFactoryTest
                 $this->directory . 'my-filename.txt',
                 [
                     'name' => 'my-filename.txt',
-                    'filename' => 'my-other-filename.txt'
+                    'filename' => 'my-other-filename.txt',
                 ],
             ],
             /**
@@ -45,7 +53,7 @@ class OriginalFilenameFactoryTest extends AbstractFilenameFactoryTest
             [
                 $this->directory . 'my-other-filename.txt',
                 [
-                    'filename' => 'my-other-filename.txt'
+                    'filename' => 'my-other-filename.txt',
                 ],
             ],
             /**
@@ -53,7 +61,7 @@ class OriginalFilenameFactoryTest extends AbstractFilenameFactoryTest
              */
             [
                 $this->directory . $this->uuid->getHex(),
-                []
+                [],
             ],
         ];
     }
@@ -65,7 +73,7 @@ class OriginalFilenameFactoryTest extends AbstractFilenameFactoryTest
         $expectedFilename = new SplFileInfo($this->directory . $this->uuid->getHex());
 
         $this->assertEquals($expectedFilename, $this->factory->generateFilename($this->uuid, [
-            'name' => 'alreadyUploaded.bin'
+            'name' => 'alreadyUploaded.bin',
         ]));
     }
 }
