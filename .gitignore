@@ -1,6 +1,7 @@
 .idea
 .php-cs-fixer.cache
 build/code-coverage/
+build/.phpunit.cache/
 build/.phpunit.result.cache
 composer.lock
 example/chunks/

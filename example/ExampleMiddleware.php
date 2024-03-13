@@ -14,9 +14,15 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use RuntimeException;
 
-class ExampleMiddleware implements MiddlewareInterface
+final readonly class ExampleMiddleware implements MiddlewareInterface
 {
-    public function __construct(protected ResponseFactoryInterface $responseFactory, protected StreamFactoryInterface $streamFactory, protected string $uploadDirectory, protected string $chunkDirectory, protected string $storageDirectory) {}
+    public function __construct(
+        private ResponseFactoryInterface $responseFactory,
+        private StreamFactoryInterface $streamFactory,
+        private string $uploadDirectory,
+        private string $chunkDirectory,
+        private string $storageDirectory,
+    ) {}
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
