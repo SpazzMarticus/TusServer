@@ -251,10 +251,10 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
 
         if ($this->getHeaderScalar($request, 'Content-Type')  === 'application/offset+octet-stream') {
             return $this->handlePatch($request, $response, $uuid);
-        } else {
-            return $response->withHeader('Upload-Offset', "0");
         }
 
+        $response = $response->withHeader('Upload-Offset', "0");
+        
         $this->eventDispatcher->dispatch(new UploadStarted($uuid, $targetFile, $storage['metadata']));
 
         return $response;
