@@ -254,7 +254,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
         }
 
         $response = $response->withHeader('Upload-Offset', "0");
-        
+
         $this->eventDispatcher->dispatch(new UploadStarted($uuid, $targetFile, $storage['metadata']));
 
         return $response;
