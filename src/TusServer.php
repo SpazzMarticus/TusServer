@@ -15,6 +15,8 @@ use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\SimpleCache\CacheInterface;
 use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\UuidFactory;
+use Ramsey\Uuid\UuidFactoryInterface;
 use Ramsey\Uuid\UuidInterface;
 use SpazzMarticus\Tus\Events\UploadComplete;
 use SpazzMarticus\Tus\Events\UploadStarted;
@@ -80,6 +82,7 @@ final class TusServer implements LoggerAwareInterface, RequestHandlerInterface
          */
         private readonly FileServiceInterface $fileService = new FileService(),
         private readonly MetadataService $metadataService = new MetadataService(),
+        private readonly UuidFactoryInterface $uuidFactory = new UuidFactory()
     ) {}
 
     /**
@@ -205,7 +208,7 @@ final class TusServer implements LoggerAwareInterface, RequestHandlerInterface
             return $this->createResponse(413); //Request Entity Too Large
         }
 
-        $uuid = Uuid::uuid4();
+        $uuid = $this->uuidFactory->uuid4();
 
         $metadata = $this->metadataService->getMetadata($request);
 
