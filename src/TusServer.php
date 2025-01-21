@@ -13,7 +13,8 @@ use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\NullLogger;
 use Psr\SimpleCache\CacheInterface;
-use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\UuidFactory;
+use Ramsey\Uuid\UuidFactoryInterface;
 use Ramsey\Uuid\UuidInterface;
 use SpazzMarticus\Tus\Events\UploadComplete;
 use SpazzMarticus\Tus\Events\UploadStarted;
@@ -49,6 +50,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
     protected FilenameFactoryInterface $targetFileFactory;
     protected LocationProviderInterface $locationProvider;
     protected MetadataService $metadataService;
+    private UuidFactoryInterface $uuidFactory;
 
     /**
      * Size Settings
@@ -74,7 +76,8 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
         CacheInterface $storage,
         EventDispatcherInterface $eventDispatcher,
         FilenameFactoryInterface $targetFileFactory,
-        LocationProviderInterface $locationProvider
+        LocationProviderInterface $locationProvider,
+        UuidFactoryInterface $uuidFactory = null
     ) {
         $this->logger = new NullLogger();
         $this->responseFactory = $responseFactory;
@@ -85,6 +88,9 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
         $this->targetFileFactory = $targetFileFactory;
         $this->locationProvider = $locationProvider;
         $this->metadataService = new MetadataService();
+        if (is_null($uuidFactory)) {
+            $this->uuidFactory = new UuidFactory();
+        }
     }
 
     /**
@@ -214,7 +220,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
             return $this->createResponse(413); //Request Entity Too Large
         }
 
-        $uuid = Uuid::uuid4();
+        $uuid = $this->uuidFactory->uuid4();
 
         $metadata = $this->metadataService->getMetadata($request);
 
