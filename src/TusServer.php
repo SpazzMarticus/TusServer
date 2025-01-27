@@ -88,9 +88,7 @@ class TusServer implements RequestHandlerInterface, LoggerAwareInterface
         $this->targetFileFactory = $targetFileFactory;
         $this->locationProvider = $locationProvider;
         $this->metadataService = new MetadataService();
-        if (is_null($uuidFactory)) {
-            $this->uuidFactory = new UuidFactory();
-        }
+        $this->uuidFactory = is_null($uuidFactory) ? new UuidFactory() : $uuidFactory;
     }
 
     /**
