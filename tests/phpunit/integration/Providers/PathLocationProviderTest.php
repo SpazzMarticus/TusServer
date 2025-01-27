@@ -1,24 +1,25 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SpazzMarticus\Tus\Providers;
 
-use Ramsey\Uuid\Uuid;
-use Mockery;
+use Laminas\Diactoros\Uri;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\UriInterface;
+use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 use SpazzMarticus\Tus\Exceptions\UnexpectedValueException;
-use Laminas\Diactoros\Uri;
-use Laminas\Diactoros\ServerRequest;
 
-class PathLocationProviderTest extends AbstractLocationProviderTest
+final class PathLocationProviderTest extends AbstractLocationProviderTestCase
 {
-    protected PathLocationProvider $provider;
+    private PathLocationProvider $provider;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
-        $this->provider = new PathLocationProvider();
         parent::setUp();
+
+        $this->provider = new PathLocationProvider();
     }
 
     public function testProvideLocation(): void
@@ -30,55 +31,58 @@ class PathLocationProviderTest extends AbstractLocationProviderTest
 
         $expectedUri = new Uri("https://www.example.org/path/to/application/6e78f7aa-7e90-4f59-8701-ea925d340b5f?param1=value1&param2&param3=value3");
 
-        $this->assertEquals($expectedUri, $this->provider->provideLocation($uuid, $request));
+        self::assertEquals($expectedUri, $this->provider->provideLocation($uuid, $request));
     }
 
-    protected function mockServerRequestInterface(string $path): ServerRequestInterface
+    private function mockServerRequestInterface(string $path): ServerRequestInterface
     {
-        $request = Mockery::mock(ServerRequestInterface::class);
-        $request->shouldReceive('getUri->getPath')
-            ->andReturn($path);
+        $uri = new Uri($path);
+
+        $request = $this->createMock(ServerRequestInterface::class);
+        $request
+            ->method('getUri')
+            ->willReturn($uri)
+        ;
 
         return $request;
     }
 
-    /**
-     * @dataProvider providerProvideUuid
-     */
-    public function testProvideUuid(ServerRequestInterface $request, ?UuidInterface $uuid): void
+    #[DataProvider('providerProvideUuid')]
+    public function testProvideUuid(string $path, ?UuidInterface $uuid): void
     {
+        $request = $this->mockServerRequestInterface($path);
+
         /**
          * Test for UUID or UnexpectedValueException
          */
-        if ($uuid) {
-            $this->assertEquals($uuid, $this->provider->provideUuid($request));
+        if ($uuid instanceof UuidInterface) {
+            self::assertEquals($uuid, $this->provider->provideUuid($request));
         } else {
             $this->expectException(UnexpectedValueException::class);
             $this->provider->provideUuid($request);
         }
     }
 
-    public function providerProvideUuid(): array
+    public static function providerProvideUuid(): \Iterator
     {
         $uuidString = '9cc981e6-4ebf-436a-a34d-0f2847d31685';
         $uuid = Uuid::fromString($uuidString);
-        return [
-            [
-                $this->mockServerRequestInterface(''),
-                null
-            ],
-            [
-                $this->mockServerRequestInterface('path/this-is-not-a-valid-uuid'),
-                null
-            ],
-            [
-                $this->mockServerRequestInterface('path/' . $uuidString),
-                $uuid
-            ],
-            [
-                $this->mockServerRequestInterface('this/is/a/longer/path/' . $uuidString),
-                $uuid
-            ],
+
+        yield [
+            '',
+            null,
+        ];
+        yield [
+            'path/this-is-not-a-valid-uuid',
+            null,
+        ];
+        yield [
+            'path/' . $uuidString,
+            $uuid,
+        ];
+        yield [
+            'this/is/a/longer/path/' . $uuidString,
+            $uuid,
         ];
     }
 }

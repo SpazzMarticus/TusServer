@@ -1,13 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd" bootstrap="../vendor/autoload.php" colors="true" verbose="true">
-  <coverage processUncoveredFiles="true">
-    <include>
-      <directory suffix=".php">../src</directory>
-    </include>
+<phpunit
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="../vendor/phpunit/phpunit/phpunit.xsd"
+  bootstrap="../vendor/autoload.php"
+  cacheDirectory=".phpunit.cache"
+  colors="true"
+  executionOrder="random"
+>
+  <coverage>
     <report>
       <html outputDirectory="code-coverage" lowUpperBound="35" highLowerBound="70"/>
     </report>
   </coverage>
+
   <testsuites>
     <testsuite name="unit">
       <directory>../tests/phpunit/unit/</directory>
@@ -16,5 +21,10 @@
       <directory>../tests/phpunit/integration/</directory>
     </testsuite>
   </testsuites>
-  <logging/>
+
+  <source>
+    <include>
+      <directory>../src</directory>
+    </include>
+  </source>
 </phpunit>

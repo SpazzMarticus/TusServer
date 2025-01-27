@@ -1,53 +1,38 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SpazzMarticus\Tus\Services;
 
-use Mockery;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
 
-class MetadataServiceTest extends \PHPUnit\Framework\TestCase
+final class MetadataServiceTest extends TestCase
 {
-    protected MetadataService $metadataService;
+    private MetadataService $metadataService;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         $this->metadataService = new MetadataService();
     }
 
-    /**
-     * @dataProvider providerGetMetdata
-     */
-    public function testGetMetadata(RequestInterface $request, array $expectedResult): void
+    public function testGetMetadata(): void
     {
-        $this->assertSame($expectedResult, $this->metadataService->getMetadata($request));
+        $request = $this->mockRequest('');
+
+        self::assertSame([], $this->metadataService->getMetadata($request));
     }
 
-    protected function mockRequest(string $header): RequestInterface
+    private function mockRequest(string $header): RequestInterface
     {
-        $request = Mockery::mock(RequestInterface::class);
-        $request->shouldReceive('getHeaderLine')
-            ->once()
+        $request = $this->createMock(RequestInterface::class);
+        $request
+            ->expects(self::once())
+            ->method('getHeaderLine')
             ->with('Upload-Metadata')
-            ->andReturn($header);
+            ->willReturn($header)
+        ;
+
         return $request;
-    }
-
-    public function providerGetMetdata(): array
-    {
-        $dataSets = [];
-
-        $request = $this->mockRequest('');
-
-        $dataSets[] = [
-            $request, []
-        ];
-
-        $request = $this->mockRequest('');
-
-        $dataSets[] = [
-            $request, []
-        ];
-
-        return $dataSets;
     }
 }
