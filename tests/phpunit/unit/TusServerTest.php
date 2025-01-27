@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SpazzMarticus\Tus;
 
 use Cache\Adapter\Filesystem\FilesystemCachePool;
@@ -13,7 +15,6 @@ use PHPUnit\Framework\TestCase;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Ramsey\Uuid\Nonstandard\Uuid;
-use Ramsey\Uuid\UuidFactory;
 use Ramsey\Uuid\UuidFactoryInterface;
 use SpazzMarticus\Tus\Factories\UuidFilenameFactory;
 use SpazzMarticus\Tus\Providers\LocationProviderInterface;
@@ -31,7 +32,7 @@ class TusServerTest extends TestCase
     protected function setUp(): void
     {
         vfsStream::setup('root', null, [
-            'uploads' => []
+            'uploads' => [],
         ]);
         $this->directory = vfsStream::url('root/uploads/');
         $this->fileNameFactory = new UuidFilenameFactory($this->directory);
@@ -45,9 +46,10 @@ class TusServerTest extends TestCase
 
     public function testWithProvideAnUuidFactoryInstance(): void
     {
-        $stub = $this->createStub(UuidFactoryInterface::class);
+        $stub = self::createStub(UuidFactoryInterface::class);
         $stub->method('uuid4')
-            ->willReturn(Uuid::fromString('00000000-0000-0000-0000-000000000000'));
+            ->willReturn(Uuid::fromString('00000000-0000-0000-0000-000000000000'))
+        ;
 
         $tusServer = new TusServer(
             $this->responseFactory,
@@ -62,7 +64,8 @@ class TusServerTest extends TestCase
         $serverRequest = $requestFactory->createServerRequest("POST", "/files");
         $serverRequest = $serverRequest->withHeader('Tus-Resumable', '1.0.0')
             ->withHeader('Upload-Length', '1000')
-            ->withHeader('Upload-Metadata', 'filename d29ybGRfZG9taW5hdGlvbl9wbGFuLnBkZg==');
+            ->withHeader('Upload-Metadata', 'filename d29ybGRfZG9taW5hdGlvbl9wbGFuLnBkZg==')
+        ;
 
         $response = $tusServer->handle($serverRequest);
         self::assertEquals(201, $response->getStatusCode());
@@ -83,7 +86,8 @@ class TusServerTest extends TestCase
         $serverRequest = $requestFactory->createServerRequest("POST", "/files");
         $serverRequest = $serverRequest->withHeader('Tus-Resumable', '1.0.0')
             ->withHeader('Upload-Length', '1000')
-            ->withHeader('Upload-Metadata', 'filename d29ybGRfZG9taW5hdGlvbl9wbGFuLnBkZg==');
+            ->withHeader('Upload-Metadata', 'filename d29ybGRfZG9taW5hdGlvbl9wbGFuLnBkZg==')
+        ;
 
         $response = $tusServer->handle($serverRequest);
         self::assertEquals(201, $response->getStatusCode());
