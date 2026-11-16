@@ -10,16 +10,7 @@ return RectorConfig::configure()
         __DIR__ . '/src',
         __DIR__ . '/tests',
     ])
-    ->withImportNames(importShortClasses: false)
-    ->withPhpSets(php82: true)
-    ->withPreparedSets(
-        codingStyle: true,
-        codeQuality: true,
-        deadCode: true,
-        earlyReturn: true,
-        instanceOf: true,
-        privatization: true,
-        strictBooleans: true,
-        typeDeclarations: true,
-    )
-;
+    ->withTypeCoverageLevel(0)
+    ->withDeadCodeLevel(0)
+    ->withCodeQualityLevel(0)
+    ->withImportNames(removeUnusedImports: true);
