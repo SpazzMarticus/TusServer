@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SpazzMarticus\Tus\Providers;
 
+use Iterator;
 use Laminas\Diactoros\Uri;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Psr\Http\Message\ServerRequestInterface;
@@ -63,7 +64,7 @@ final class PathLocationProviderTest extends AbstractLocationProviderTestCase
         }
     }
 
-    public static function providerProvideUuid(): \Iterator
+    public static function providerProvideUuid(): Iterator
     {
         $uuidString = '9cc981e6-4ebf-436a-a34d-0f2847d31685';
         $uuid = Uuid::fromString($uuidString);

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SpazzMarticus\Tus\Services;
 
+use Iterator;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -162,7 +163,7 @@ final class FileServiceTest extends TestCase
         self::assertSame($content, file_get_contents($this->getTargetFilePath()));
     }
 
-    public static function providerCopyFromStream(): \Iterator
+    public static function providerCopyFromStream(): Iterator
     {
         /**
          * Negative numbers...

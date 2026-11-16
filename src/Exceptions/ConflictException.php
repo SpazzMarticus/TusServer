@@ -4,4 +4,6 @@ declare(strict_types=1);
 
 namespace SpazzMarticus\Tus\Exceptions;
 
-final class ConflictException extends \RuntimeException {}
+use RuntimeException;
+
+final class ConflictException extends RuntimeException {}

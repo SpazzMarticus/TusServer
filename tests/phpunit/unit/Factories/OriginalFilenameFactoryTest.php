@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SpazzMarticus\Tus\Factories;
 
+use Iterator;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Ramsey\Uuid\Uuid;
 
@@ -29,7 +30,7 @@ final class OriginalFilenameFactoryTest extends AbstractFilenameFactoryTestCase
         self::assertEquals($expectedFilename, $this->factory->generateFilename($this->uuid, $metadata));
     }
 
-    public static function providerGenerateFilename(): \Iterator
+    public static function providerGenerateFilename(): Iterator
     {
         /**
          * Prefer Name from $metadata['name']
