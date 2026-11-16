@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace SpazzMarticus\Example;
 
+use FilesystemIterator;
+use SplFileObject;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -68,13 +70,13 @@ final readonly class ExampleMiddleware implements MiddlewareInterface
     private function deleteDirectories(string $dir): void
     {
         if (is_dir($dir)) {
-            $it = new RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS);
+            $it = new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS);
             $files = new RecursiveIteratorIterator(
                 $it,
                 RecursiveIteratorIterator::CHILD_FIRST
             );
             foreach ($files as $file) {
-                \assert($file instanceof \SplFileObject);
+                \assert($file instanceof SplFileObject);
 
                 if ($file->isDir()) {
                     rmdir($file->getRealPath());
