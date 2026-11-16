@@ -5,7 +5,11 @@
       <html outputDirectory=".code-coverage" lowUpperBound="35" highLowerBound="70"/>
     </report>
   </coverage>
-
+  <source>
+    <include>
+      <directory>src/</directory>
+    </include>
+  </source>
   <testsuites>
     <testsuite name="unit">
       <directory>tests/phpunit/unit/</directory>

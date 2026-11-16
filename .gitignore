@@ -1,6 +1,6 @@
 .idea
 .php-cs-fixer.cache
-build/code-coverage/
+.code-coverage
 build/.phpunit.cache/
 build/.phpunit.result.cache
 composer.lock

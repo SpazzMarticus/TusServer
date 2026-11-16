@@ -67,7 +67,7 @@ final class FileServiceTest extends TestCase
         self::assertFalse($this->fileService->exists($file));
 
         $this->expectException(RuntimeException::class);
-        $this->fileService->create($file);
+        @$this->fileService->create($file); //silence STREAM_REPORT_ERRORS warnings from vfsStream
     }
 
     #[Depends('testCreateSuccess')]
@@ -105,7 +105,7 @@ final class FileServiceTest extends TestCase
      */
     private function mockStream(array $chunks): StreamInterface
     {
-        $stream = $this->createMock(StreamInterface::class);
+        $stream = $this->createStub(StreamInterface::class);
 
         $count = \count($chunks);
         $eof = array_fill(0, $count, false);
@@ -281,7 +281,7 @@ final class FileServiceTest extends TestCase
     #[Depends('testCopyFromStream')]
     public function testCopyFromStreamWritingThrowsException(): void
     {
-        $stream = $this->mockStream(['1234','5678']);
+        $stream = $this->mockStream(['1234', '5678']);
 
         $file = $this->getTargetFilePath();
 
@@ -296,7 +296,7 @@ final class FileServiceTest extends TestCase
     #[Depends('testCopyFromStream')]
     public function testCopyFromStreamFlushingThrowsException(): void
     {
-        $stream = $this->mockStream(['1234','5678']);
+        $stream = $this->mockStream(['1234', '5678']);
 
         $file = $this->getTargetFilePath();
 
