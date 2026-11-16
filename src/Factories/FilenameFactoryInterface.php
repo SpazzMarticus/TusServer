@@ -9,7 +9,7 @@ use Ramsey\Uuid\UuidInterface;
 interface FilenameFactoryInterface
 {
     /**
-     * @param array<string, mixed> $metadata
+     * @param array{name?: ?string, filename?: ?string} $metadata
      */
     public function generateFilename(UuidInterface $uuid, array $metadata): string;
 }

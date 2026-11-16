@@ -12,6 +12,9 @@ final readonly class UuidFilenameFactory implements FilenameFactoryInterface
         private string $directory,
     ) {}
 
+    /**
+     * @param array{name?: ?string, filename?: ?string} $metadata
+     */
     public function generateFilename(UuidInterface $uuid, array $metadata): string
     {
         return $this->directory . $uuid->getHex();
