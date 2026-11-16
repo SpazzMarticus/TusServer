@@ -64,6 +64,9 @@ final class PathLocationProviderTest extends AbstractLocationProviderTestCase
         }
     }
 
+    /**
+     * @return Iterator<int,array{0:string,1:?UuidInterface}>
+     */
     public static function providerProvideUuid(): Iterator
     {
         $uuidString = '9cc981e6-4ebf-436a-a34d-0f2847d31685';

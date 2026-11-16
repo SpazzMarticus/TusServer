@@ -12,6 +12,9 @@ final readonly class OriginalFilenameFactory implements FilenameFactoryInterface
         private string $directory,
     ) {}
 
+    /**
+     * @param array{name?: ?string, filename?: ?string} $metadata
+     */
     public function generateFilename(UuidInterface $uuid, array $metadata): string
     {
         $filename = $metadata['name'] ?? $metadata['filename'] ?? null;

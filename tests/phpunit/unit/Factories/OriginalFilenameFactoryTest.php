@@ -20,7 +20,7 @@ final class OriginalFilenameFactoryTest extends AbstractFilenameFactoryTestCase
     }
 
     /**
-     * @param array<string, mixed> $metadata
+     * @param array{name?: ?string, filename?: ?string} $metadata
      */
     #[DataProvider('providerGenerateFilename')]
     public function testGenerateFilename(string $expectedFilename, array $metadata): void
@@ -30,6 +30,9 @@ final class OriginalFilenameFactoryTest extends AbstractFilenameFactoryTestCase
         self::assertEquals($expectedFilename, $this->factory->generateFilename($this->uuid, $metadata));
     }
 
+    /**
+     * @return Iterator<int, array{0: string, 1: array{name?: ?string, filename?: ?string}}>
+     */
     public static function providerGenerateFilename(): Iterator
     {
         /**

@@ -19,6 +19,10 @@ jobs:
           composer-options: "--no-interaction --no-progress --optimize-autoloader"
       - name: Check for coding style
         run: vendor/bin/php-cs-fixer fix --dry-run
+      - name: Rector
+        run: vendor/bin/rector process --dry-run --no-progress-bar
+      - name: PHPStan
+        run: vendor/bin/phpstan --no-progress
       - name: PHPUnit
         run: XDEBUG_MODE=coverage vendor/bin/phpunit
       - name: Installing npm dependencies (for testing only)

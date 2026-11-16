@@ -101,7 +101,7 @@ final class FileServiceTest extends TestCase
     }
 
     /**
-     * @param string[] $chunks
+     * @param array<int,string> $chunks
      */
     private function mockStream(array $chunks): StreamInterface
     {
@@ -137,7 +137,7 @@ final class FileServiceTest extends TestCase
     }
 
     /**
-     * @return string[]
+     * @return array<int,string>
      */
     private function chunkString(string $string, int $chunkSize): array
     {
@@ -163,6 +163,9 @@ final class FileServiceTest extends TestCase
         self::assertSame($content, file_get_contents($this->getTargetFilePath()));
     }
 
+    /**
+     * @return Iterator<int,array{0:string,1:int}>
+     */
     public static function providerCopyFromStream(): Iterator
     {
         /**

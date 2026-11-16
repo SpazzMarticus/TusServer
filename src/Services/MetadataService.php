@@ -21,6 +21,7 @@ final class MetadataService
         if (($metadataHeader = $request->getHeaderLine('Upload-Metadata')) !== '') {
             foreach (explode(',', $metadataHeader) as $keyValuePair) {
                 $keyValuePair = explode(' ', $keyValuePair);
+                //@phpstan-ignore isset.offset
                 if (!isset($keyValuePair[0])) {
                     continue;
                 }
