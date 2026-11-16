@@ -13,4 +13,5 @@ return RectorConfig::configure()
     ->withTypeCoverageLevel(0)
     ->withDeadCodeLevel(0)
     ->withCodeQualityLevel(0)
-    ->withImportNames(removeUnusedImports: true);
+    ->withImportNames(removeUnusedImports: true)
+;

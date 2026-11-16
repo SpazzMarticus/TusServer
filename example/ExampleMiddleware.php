@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace SpazzMarticus\Example;
 
 use FilesystemIterator;
-use SplFileObject;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -15,6 +14,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use RuntimeException;
+use SplFileObject;
 
 final readonly class ExampleMiddleware implements MiddlewareInterface
 {
