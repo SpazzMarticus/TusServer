@@ -105,7 +105,7 @@ final class FileServiceTest extends TestCase
      */
     private function mockStream(array $chunks): StreamInterface
     {
-        $stream = $this->createStub(StreamInterface::class);
+        $stream = self::createStub(StreamInterface::class);
 
         $count = \count($chunks);
         $eof = array_fill(0, $count, false);

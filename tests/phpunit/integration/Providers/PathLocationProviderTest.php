@@ -39,7 +39,7 @@ final class PathLocationProviderTest extends AbstractLocationProviderTestCase
     {
         $uri = new Uri($path);
 
-        $request = $this->createStub(ServerRequestInterface::class);
+        $request = self::createStub(ServerRequestInterface::class);
         $request
             ->method('getUri')
             ->willReturn($uri)

@@ -49,7 +49,7 @@ final class ParameterLocationProviderTest extends AbstractLocationProviderTestCa
      */
     private function mockServerRequestInterface(array $queryParams): ServerRequestInterface
     {
-        $request = $this->createStub(ServerRequestInterface::class);
+        $request = self::createStub(ServerRequestInterface::class);
         $request
             ->method('getQueryParams')
             ->willReturn($queryParams)
