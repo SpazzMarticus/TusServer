@@ -65,7 +65,7 @@ $middleware = new ExampleMiddleware($responseFactory, $streamFactory, $uploadDir
  *
  * Use (at least at the end of a cache chain) a non-volatile storage to truly allow resumable uploads
  */
-$storage = new FilesystemCachePool(new Filesystem(new LocalFilesystemAdapter($cacheDirectory)), '');
+$storage = new FilesystemCachePool(new Filesystem(new LocalFilesystemAdapter($cacheDirectory)));
 
 /**
  * PSR-14 Event Dispatcher
