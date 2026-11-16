@@ -88,7 +88,7 @@ final class TusServer implements LoggerAwareInterface, RequestHandlerInterface
      * Implemented for future implementation of Checksum-Extension as defined in tus.io-Protocol.
      * (Since Uppy does not support it (yet?), this will proably be added later on.)
      */
-    public function setUseIntermediateChunk(bool $use, string $chunkDirectory = null): self
+    public function setUseIntermediateChunk(bool $use, ?string $chunkDirectory = null): self
     {
         $this->useIntermediateChunk = $use;
         $this->chunkDirectory = $chunkDirectory ?? sys_get_temp_dir() . '/';
@@ -112,7 +112,7 @@ final class TusServer implements LoggerAwareInterface, RequestHandlerInterface
      * @param int $ttl Restricts calls by time to live, ticking from completion of the upload
      * @param bool $allowPartial Restricts calls to complete files
      */
-    public function setAllowGetCalls(bool $allow, int $ttl = null, bool $allowPartial = false): self
+    public function setAllowGetCalls(bool $allow, ?int $ttl = null, bool $allowPartial = false): self
     {
         $this->allowGetCalls = $allow;
         $this->storageTTLAfterUploadComplete = $allow ? $ttl : -1;
@@ -182,8 +182,7 @@ final class TusServer implements LoggerAwareInterface, RequestHandlerInterface
         $size = $this->fileService->size($targetFile);
 
         $response = $this->createResponse(200)
-            ->withHeader('Upload-Offset', (string) $size)
-        ;
+            ->withHeader('Upload-Offset', (string) $size);
 
         if (!$storage['defer']) {
             return $response->withHeader('Upload-Length', (string) $storage['length']);
@@ -234,8 +233,7 @@ final class TusServer implements LoggerAwareInterface, RequestHandlerInterface
 
         //Created
         $response = $this->createResponse(201)
-            ->withHeader('Location', (string) $this->locationProvider->provideLocation($uuid, $request))
-        ;
+            ->withHeader('Location', (string) $this->locationProvider->provideLocation($uuid, $request));
 
         if ($defer) {
             $response = $response->withHeader('Upload-Defer-Length', "1");
@@ -252,7 +250,7 @@ final class TusServer implements LoggerAwareInterface, RequestHandlerInterface
         return $response;
     }
 
-    private function handlePatch(ServerRequestInterface $request, ResponseInterface $response = null, UuidInterface $uuid = null): ResponseInterface
+    private function handlePatch(ServerRequestInterface $request, ?ResponseInterface $response = null, ?UuidInterface $uuid = null): ResponseInterface
     {
         if ($this->getHeaderScalar($request, 'Content-Type')  !== 'application/offset+octet-stream') {
             return $this->createResponse(415);
@@ -376,8 +374,7 @@ final class TusServer implements LoggerAwareInterface, RequestHandlerInterface
         }
 
         $response = $this->createResponse(204, $response) //No Content
-            ->withHeader('Upload-Offset', (string) $size)
-        ;
+            ->withHeader('Upload-Offset', (string) $size);
 
         if ($defer) {
             $response = $response->withHeader('Upload-Defer-Length', "1");
@@ -433,8 +430,7 @@ final class TusServer implements LoggerAwareInterface, RequestHandlerInterface
         }
 
         $response =  $this->createResponse(200)
-            ->withBody($this->streamFactory->createStreamFromFile($targetFile))
-        ;
+            ->withBody($this->streamFactory->createStreamFromFile($targetFile));
 
         /**
          * Filename currently not escaped
@@ -442,8 +438,7 @@ final class TusServer implements LoggerAwareInterface, RequestHandlerInterface
          */
         $response = $response->withHeader('Content-Length', (string) $this->fileService->size($targetFile))
             ->withHeader('Content-Disposition', 'attachment; filename="' . $targetFile . '"')
-            ->withHeader('Content-Transfer-Encoding', 'binary')
-        ;
+            ->withHeader('Content-Transfer-Encoding', 'binary');
 
         if (isset($storage['metadata']['type'])) {
             $metadataType = $storage['metadata']['type'];
@@ -466,7 +461,7 @@ final class TusServer implements LoggerAwareInterface, RequestHandlerInterface
     /**
      * Create a basic Response
      */
-    private function createResponse(int $code = 200, ResponseInterface $response = null): ResponseInterface
+    private function createResponse(int $code = 200, ?ResponseInterface $response = null): ResponseInterface
     {
         $response = $response instanceof ResponseInterface ? $response->withStatus($code) : $this->responseFactory->createResponse($code);
 
