@@ -23,7 +23,8 @@ final class ParameterLocationProvider extends AbstractLocationProvider
     public function provideUuid(ServerRequestInterface $request): UuidInterface
     {
         $queryParams = $request->getQueryParams();
-        $uuidString = (isset($queryParams['uuid']) && is_string($queryParams['uuid'])) ? $queryParams['uuid'] : '';
+        $uuidString = (isset($queryParams['uuid']) && \is_string($queryParams['uuid'])) ? $queryParams['uuid'] : '';
+
         try {
             return Uuid::fromString($uuidString);
         } catch (InvalidUuidStringException) {

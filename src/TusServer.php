@@ -182,7 +182,8 @@ final class TusServer implements LoggerAwareInterface, RequestHandlerInterface
         $size = $this->fileService->size($targetFile);
 
         $response = $this->createResponse(200)
-            ->withHeader('Upload-Offset', (string) $size);
+            ->withHeader('Upload-Offset', (string) $size)
+        ;
 
         if (!$storage['defer']) {
             return $response->withHeader('Upload-Length', (string) $storage['length']);
@@ -233,7 +234,8 @@ final class TusServer implements LoggerAwareInterface, RequestHandlerInterface
 
         //Created
         $response = $this->createResponse(201)
-            ->withHeader('Location', (string) $this->locationProvider->provideLocation($uuid, $request));
+            ->withHeader('Location', (string) $this->locationProvider->provideLocation($uuid, $request))
+        ;
 
         if ($defer) {
             $response = $response->withHeader('Upload-Defer-Length', "1");
@@ -374,7 +376,8 @@ final class TusServer implements LoggerAwareInterface, RequestHandlerInterface
         }
 
         $response = $this->createResponse(204, $response) //No Content
-            ->withHeader('Upload-Offset', (string) $size);
+            ->withHeader('Upload-Offset', (string) $size)
+        ;
 
         if ($defer) {
             $response = $response->withHeader('Upload-Defer-Length', "1");
@@ -430,7 +433,8 @@ final class TusServer implements LoggerAwareInterface, RequestHandlerInterface
         }
 
         $response =  $this->createResponse(200)
-            ->withBody($this->streamFactory->createStreamFromFile($targetFile));
+            ->withBody($this->streamFactory->createStreamFromFile($targetFile))
+        ;
 
         /**
          * Filename currently not escaped
@@ -438,7 +442,8 @@ final class TusServer implements LoggerAwareInterface, RequestHandlerInterface
          */
         $response = $response->withHeader('Content-Length', (string) $this->fileService->size($targetFile))
             ->withHeader('Content-Disposition', 'attachment; filename="' . $targetFile . '"')
-            ->withHeader('Content-Transfer-Encoding', 'binary');
+            ->withHeader('Content-Transfer-Encoding', 'binary')
+        ;
 
         if (isset($storage['metadata']['type'])) {
             $metadataType = $storage['metadata']['type'];
