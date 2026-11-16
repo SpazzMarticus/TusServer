@@ -7,8 +7,8 @@ use Laminas\Diactoros\ResponseFactory;
 use Laminas\Diactoros\ServerRequestFactory;
 use Laminas\Diactoros\StreamFactory;
 use Laminas\HttpHandlerRunner\Emitter\SapiEmitter;
-use League\Flysystem\Adapter\Local;
 use League\Flysystem\Filesystem;
+use League\Flysystem\Local\LocalFilesystemAdapter;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use SpazzMarticus\Example\ExampleMiddleware;
@@ -65,7 +65,7 @@ $middleware = new ExampleMiddleware($responseFactory, $streamFactory, $uploadDir
  *
  * Use (at least at the end of a cache chain) a non-volatile storage to truly allow resumable uploads
  */
-$storage = new FilesystemCachePool(new Filesystem(new Local($cacheDirectory)), '');
+$storage = new FilesystemCachePool(new Filesystem(new LocalFilesystemAdapter($cacheDirectory)), '');
 
 /**
  * PSR-14 Event Dispatcher
