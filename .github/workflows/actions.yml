@@ -13,14 +13,14 @@ jobs:
           cache: 'npm'
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: '8.5'
       - uses: "ramsey/composer-install@v3"
         with:
           composer-options: "--no-interaction --no-progress --optimize-autoloader"
       - name: Check for coding style
         run: vendor/bin/php-cs-fixer fix --dry-run
       - name: PHPUnit
-        run: vendor/bin/phpunit -c build/phpunit.xml
+        run: XDEBUG_MODE=coverage vendor/bin/phpunit
       - name: Installing npm dependencies (for testing only)
         run: npm ci
       - name: Run PHP built-in webserver (in background) and newman tests
